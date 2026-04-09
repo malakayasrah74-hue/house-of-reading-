@@ -7,23 +7,9 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2R4HSN4Z25"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-2R4HSN4Z25');
-    </script>
-    
-    <!-- Google tag (gtag.js) - جديد -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-LWHNGEQXC9"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-LWHNGEQXC9');
-    </script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     
     <style>
         :root { --bg-primary: #1a1512; --bg-secondary: #231d19; --bg-card: #2d2520; --fg-primary: #f5ebe0; --fg-secondary: #b8a898; --accent-gold: #c9a962; --accent-copper: #8b5a2b; --border: #4a3d32; }
@@ -448,39 +434,56 @@
         <div id="p-benefits" class="page"><section class="content-section"><h1 class="section-title font-display">فوائد القراءة</h1><div class="benefits-grid" id="bng"></div></section></div>
         <div id="p-rules" class="page"><section class="content-section"><h1 class="section-title font-display">قواعد المكتبة</h1><div class="rules-grid" id="rg"></div></section></div>
         
-        <!-- صفحة التقييمات -->
+        <!-- صفحة التقييمات - تعليقات عامة لكل العالم -->
         <div id="p-reviews" class="page">
             <section class="content-section">
                 <h1 class="section-title font-display">آراء القرّاء</h1>
                 <div class="reviews-section">
                     <div class="review-form-card">
                         <h3> أضف تقييمك</h3>
-                        <input type="text" id="reviewName" class="review-input" placeholde:="الاسم" required>
+                        <input type="text" id="reviewName" class="review-input" placeholder="الاسم" required>
                         <div class="star-label"> التقييم </div>
                         <div class="star-rating" id="starRating">
-                            <span data-val="1">☆</span>
-                            <span data-val="2">☆</span>
-                            <span data-val="3">☆</span>
-                            <span data-val="4">☆</span>
-                            <span data-val="5">☆</span>
+                            <span data-val="1">★</span>
+                            <span data-val="2">★</span>
+                            <span data-val="3">★</span>
+                            <span data-val="4">★</span>
+                            <span data-val="5">★</span>
                         </div>
                         <textarea id="reviewText" class="review-textarea" placeholder="تعليقك..."></textarea>
                         <button class="btn btn-primary" id="submitReview" style="width:100%">إرسال التقييم</button>
                     </div>
                     <div class="reviews-list" id="reviewsList">
-                        <div class="empty-reviews">لا توجد تقييمات بعد، كن أول من يقيم المكتبة!</div>
+                        <div class="empty-reviews">جاري تحميل التقييمات...</div>
                     </div>
                 </div>
             </section>
         </div>
     </main>
 
-    <div class="modal-overlay" id="mo"><div class="modal-content"><button class="modal-close" onclick="cm()">X</button><div class="modal-body" id="mb"></div><div class="modal-extra-info" id="me"></div></div></div>
+    <div class="modal-overlay" id="mo"><div class="modal-content"><button class="modal-close" onclick="cm()">✕</button><div class="modal-body" id="mb"></div><div class="modal-extra-info" id="me"></div></div></div>
 
     <footer class="main-footer"><div class="footer-content"><div class="footer-section"><h3>بيت القراءة</h3><p>تحميل PDF مجاني</p></div><div class="footer-section"><h3>روابط</h3><a href="#" onclick="nav('home');return false">الرئيسية</a><a href="#" onclick="nav('books');return false">المكتبة</a></div><div class="footer-section"><h3>تصنيفات</h3><a href="#" onclick="goCat('islamic');return false">إسلامية</a><a href="#" onclick="goCat('stories');return false">القصص</a></div></div><div class="footer-bottom"><p>2026 جميع الحقوق محفوظة</p></div></footer>
     <div class="toast" id="ts"></div>
 
     <script>
+        // ============================================================
+        // 🔥 ضع إعدادات Firebase الخاصة بك هنا 🔥
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        // ============================================================
+        
+        // تهيئة Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        
         function enterSite(){document.getElementById('introScreen').classList.add('hide');}
         setTimeout(()=>{if(!document.getElementById('introScreen').classList.contains('hide'))enterSite();},4000);
 
@@ -542,7 +545,7 @@
         for(let i=books.length;i<200;i++){let c=allCats[Math.floor(Math.random()*allCats.length)],s=sub[c][Math.floor(Math.random()*sub[c].length)];books.push({id:i+1,t:'كتاب '+s+' '+(i-base.length+1),a:auth[c][Math.floor(Math.random()*auth[c].length)],c,p:Math.floor(Math.random()*400)+100,y:Math.floor(Math.random()*600)+300+'هـ',r:4,d:'كتاب في '+s,s,u:'https://www.noor-book.com/'});}
 
         const quotes=[
-        {t:"العلم يرفع بيوتاً لا عماد لها والجهل يهدم بيت العز والشرف",a:"حكمة عربية"},{t:"من طلب العلا سهر الليالي",a:"المتنبي"},{t:"العلم في الصغر كالنقش على الحجر",a:"حكمة"},{t:"اطلبوا العلم من المهد إلى اللحد",a:"حكمة"},{t:"القراءة غذاء العقل والروح",a:"حكمة"},{t:"الكتاب خير جليس وأنيس",a:"الجاحظ"},{t:"العلم ملك والمال عبد",a:"حكمة"},{t:"القلم أقوى من السيف",a:"مثل"},{t:"خير جليس في الزمان كتاب",a:"المتنبي"},{t:"العلم نور والجهل ظلام",a:"حكمة"},{t:"الكتاب نافذة على العالم",a:"حكمة"},{t:"لا خير في علم لا يُنتفع به",a:"حكمة"},{t:"العلم كنز لا يفنى",a:"حكمة"},{t:"القارئ يعيش ألف حياة",a:"جورج مارتن"},{t:"الكتب سفن تمخر عباب الزمن",a:"حكمة"},{t:"الجهل عدو الإنسان الأول",a:"حكمة"},{t:"العلم يورث التواضع",a:"حكمة"},{t:"الكتاب صديق وفي",a:"حكمة"},{t:"العلم أساس كل تقدم",a:"حكمة"},{t:"الكتاب رفيق الدرب",a:"حكمة"},{t:"العلم يرفع صاحبه",a:"حكمة"},{t:"القراءة مفتاح المعرفة",a:"حكمة"},{t:"الكتاب نهر من الحكمة",a:"حكمة"},{t:"القراءة متعة العقل",a:"حكمة"},{t:"الكتاب يفتح الآفاق",a:"حكمة"},{t:"العلم زاد المسافر",a:"حكمة"},{t:"القراءة تزيد المعرفة",a:"حكمة"},{t:"الكتاب يزيل الوحدة",a:"حكمة"},{t:"العلم يبني الحضارات",a:"حكمة"},{t:"الكتاب حصن من الجهل",a:"حكمة"},{t:"العلم يورث السعادة",a:"حكمة"},{t:"القراءة تثري اللغة",a:"حكمة"},{t:"الكتاب يمسح الهموم",a:"حكمة"},{t:"العلم نور الدنيا",a:"حكمة"},{t:"القراءة باب للإبداع",a:"حكمة"},{t:"الكتاب يعلم الصبر",a:"حكمة"},{t:"العلم يرفع الهمم",a:"حكمة"},{t:"القراءة تشرح الصدور",a:"حكمة"},{t:"الكتاب جسر للثقافات",a:"حكمة"},{t:"العلم يصقل العقول",a:"حكمة"},{t:"القراءة رحلة بلا تذاكر",a:"حكمة"},{t:"العلماء ورثة الأنبياء",a:"حديث"},{t:"اطلبوا العلم ولو في الصين",a:"حديث"},{t:"إنما العلم بالتعلم",a:"حديث"},{t:"خير الناس أنفعهم للناس",a:"حديث"},{t:"طلب العلم فريضة",a:"حديث"},{t:"إن الله يحب العمل المتقن",a:"حديث"},{t:"خيركم من تعلم القرآن وعلمه",a:"حديث"},{t:"الدين النصيحة",a:"حديث"},{t:"إنما الأعمال بالنيات",a:"حديث"},{t:"لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه",a:"حديث"},{t:"تبسمك في وجه أخيك صدقة",a:"حديث"},{t:"الكلمة الطيبة صدقة",a:"حديث"},{t:"المؤمن لا يلدغ من جحر مرتين",a:"حديث"},{t:"من كتم علماً ألجم بلجام من نار",a:"حديث"},{t:"الحكمة ضالة المؤمن",a:"حديث"},{t:"المرء على دين خليله",a:"حديث"},{t:"من لا يرحم لا يُرحم",a:"حديث"},{t:"اليد العليا خير من اليد السفلى",a:"حديث"},{t:"من سلك طريقاً يلتمس فيه علماً سهل الله له طريقاً إلى الجنة",a:"حديث"},{t:"العلم في الشباب كالنقش في الحجر",a:"حكمة"},{t:"الكتاب صديق لا يخون",a:"حكمة"},{t:"العلم يورث حب الله",a:"حكمة"},{t:"القراءة متعة لا تنتهي",a:"حكمة"},{t:"الكتاب نعمة من الله",a:"حكمة"},{t:"العلم يزين صاحبه",a:"حكمة"},{t:"القراءة تهذب النفوس",a:"حكمة"},{t:"الكتاب يصقل المواهب",a:"حكمة"},{t:"العلم يبعد عن الجهل",a:"حكمة"},{t:"القراءة تعلم الحكم",a:"حكمة"},{t:"الكتاب يفتح الذهن",a:"حكمة"},{t:"العلم يورث الخشية",a:"حكمة"},{t:"القراءة تصفي الأذهان",a:"حكمة"},{t:"الكتاب يطرد الملل",a:"حكمة"},{t:"العلم أفضل من المال",a:"حكمة"},{t:"القراءة تزيد الفهم",a:"حكمة"},{t:"الكتاب يربي العقول",a:"حكمة"},{t:"العلم يرفع القدر",a:"حكمة"},{t:"القراءة تبعد الجهل",a:"حكمة"},{t:"الكتاب ينمي الفكر",a:"حكمة"},{t:"العلم يورث الأجر",a:"حكمة"},{t:"القراءة تشرح البال",a:"حكمة"},{t:"الكتاب يؤنس الوحشة",a:"حكمة"},{t:"العلم يورث المحبة",a:"حكمة"},{t:"القراءة تذهب الهم",a:"حكمة"},{t:"الكتاب يغذي الروح",a:"حكمة"},{t:"العلم يورث الراحة",a:"حكمة"},{t:"القراءة تجدد العقل",a:"حكمة"},{t:"الكتاب يحفظ الوقت",a:"حكمة"},{t:"العلم يورث البركة",a:"حكمة"},{t:"القراءة تكسب المعارف",a:"حكمة"},{t:"الكتاب يوسع المدارك",a:"حكمة"},{t:"العلم يورث النور",a:"حكمة"},{t:"القراءة تغذي الفكر",a:"حكمة"},{t:"الكتاب يبني الحياة",a:"حكمة"},{t:"العلم يورث الجمال",a:"حكمة"},{t:"القراءة تضيء الطريق",a:"حكمة"},{t:"الكتاب يقرأ ولا يُمل",a:"حكمة"},{t:"من أحب أن ينظر إلى رجل أعطاه الله علماً بلا تعب فليقرأ القرآن",a:"علي بن أبي طالب"},{t:"لا حسد إلا في اثنتين",a:"حديث"},{t:"من خرج في طلب العلم فهو في سبيل الله",a:"حديث"},{t:"الكلمة الطيبة صدقة",a:"حديث"},{t:"الكتاب يعطي بلا حدود",a:"حكمة"},{t:"العلم يهدي للحق",a:"حكمة"},{t:"القراءة تفتح الأبواب",a:"حكمة"},{t:"الكتاب نافذة على العالم",a:"حكمة"},{t:"العلم يورث السعادة",a:"حكمة"}
+        {t:"العلم يرفع بيوتاً لا عماد لها والجهل يهدم بيت العز والشرف",a:"حكمة عربية"},{t:"من طلب العلا سهر الليالي",a:"المتنبي"},{t:"العلم في الصغر كالنقش على الحجر",a:"حكمة"},{t:"اطلبوا العلم من المهد إلى اللحد",a:"حكمة"},{t:"القراءة غذاء العقل والروح",a:"حكمة"},{t:"الكتاب خير جليس وأنيس",a:"الجاحظ"},{t:"العلم ملك والمال عبد",a:"حكمة"},{t:"القلم أقوى من السيف",a:"مثل"},{t:"خير جليس في الزمان كتاب",a:"المتنبي"},{t:"العلم نور والجهل ظلام",a:"حكمة"},{t:"الكتاب نافذة على العالم",a:"حكمة"},{t:"لا خير في علم لا يُنتفع به",a:"حكمة"},{t:"العلم كنز لا يفنى",a:"حكمة"},{t:"القارئ يعيش ألف حياة",a:"جورج مارتن"},{t:"الكتب سفن تمخر عباب الزمن",a:"حكمة"},{t:"الجهل عدو الإنسان الأول",a:"حكمة"},{t:"العلم يورث التواضع",a:"حكمة"},{t:"الكتاب صديق وفي",a:"حكمة"},{t:"العلم أساس كل تقدم",a:"حكمة"},{t:"الكتاب رفيق الدرب",a:"حكمة"},{t:"العلم يرفع صاحبه",a:"حكمة"},{t:"القراءة مفتاح المعرفة",a:"حكمة"},{t:"الكتاب نهر من الحكمة",a:"حكمة"},{t:"القراءة متعة العقل",a:"حكمة"},{t:"الكتاب يفتح الآفاق",a:"حكمة"},{t:"العلم زاد المسافر",a:"حكمة"},{t:"القراءة تزيد المعرفة",a:"حكمة"},{t:"الكتاب يزيل الوحدة",a:"حكمة"},{t:"العلم يبني الحضارات",a:"حكمة"},{t:"الكتاب حصن من الجهل",a:"حكمة"},{t:"العلم يورث السعادة",a:"حكمة"},{t:"القراءة تثري اللغة",a:"حكمة"},{t:"الكتاب يمسح الهموم",a:"حكمة"},{t:"العلم نور الدنيا",a:"حكمة"},{t:"القراءة باب للإبداع",a:"حكمة"},{t:"الكتاب يعلم الصبر",a:"حكمة"},{t:"العلم يرفع الهمم",a:"حكمة"},{t:"القراءة تشرح الصدور",a:"حكمة"},{t:"الكتاب جسر للثقافات",a:"حكمة"},{t:"العلم يصقل العقول",a:"حكمة"},{t:"القراءة رحلة بلا تذاكر",a:"حكمة"},{t:"العلماء ورثة الأنبياء",a:"حديث"},{t:"اطلبوا العلم ولو في الصين",a:"حديث"},{t:"إنما العلم بالتعلم",a:"حديث"},{t:"خير الناس أنفعهم للناس",a:"حديث"},{t:"طلب العلم فريضة",a:"حديث"},{t:"إن الله يحب العمل المتقن",a:"حديث"},{t:"خيركم من تعلم القرآن وعلمه",a:"حديث"},{t:"الدين النصيحة",a:"حديث"},{t:"إنما الأعمال بالنيات",a:"حديث"},{t:"لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه",a:"حديث"},{t:"تبسمك في وجه أخيك صدقة",a:"حديث"},{t:"الكلمة الطيبة صدقة",a:"حديث"},{t:"المؤمن لا يلدغ من جحر مرتين",a:"حديث"},{t:"من كتم علماً ألجم بلجام من نار",a:"حديث"},{t:"الحكمة ضالة المؤمن",a:"حديث"},{t:"المرء على دين خليله",a:"حديث"},{t:"من لا يرحم لا يُرحم",a:"حديث"},{t:"اليد العليا خير من اليد السفلى",a:"حديث"},{t:"من سلك طريقاً يلتمس فيه علماً سهل الله له طريقاً إلى الجنة",a:"حديث"},{t:"العلم في الشباب كالنقش على الحجر",a:"حكمة"},{t:"الكتاب صديق لا يخون",a:"حكمة"},{t:"العلم يورث حب الله",a:"حكمة"},{t:"القراءة متعة لا تنتهي",a:"حكمة"},{t:"الكتاب نعمة من الله",a:"حكمة"},{t:"العلم يزين صاحبه",a:"حكمة"},{t:"القراءة تهذب النفوس",a:"حكمة"},{t:"الكتاب يصقل المواهب",a:"حكمة"},{t:"العلم يبعد عن الجهل",a:"حكمة"},{t:"القراءة تعلم الحكم",a:"حكمة"},{t:"الكتاب يفتح الذهن",a:"حكمة"},{t:"العلم يورث الخشية",a:"حكمة"},{t:"القراءة تصفي الأذهان",a:"حكمة"},{t:"الكتاب يطرد الملل",a:"حكمة"},{t:"العلم أفضل من المال",a:"حكمة"},{t:"القراءة تزيد الفهم",a:"حكمة"},{t:"الكتاب يربي العقول",a:"حكمة"},{t:"العلم يرفع القدر",a:"حكمة"},{t:"القراءة تبعد الجهل",a:"حكمة"},{t:"الكتاب ينمي الفكر",a:"حكمة"},{t:"العلم يورث الأجر",a:"حكمة"},{t:"القراءة تشرح البال",a:"حكمة"},{t:"الكتاب يؤنس الوحشة",a:"حكمة"},{t:"العلم يورث المحبة",a:"حكمة"},{t:"القراءة تذهب الهم",a:"حكمة"},{t:"الكتاب يغذي الروح",a:"حكمة"},{t:"العلم يورث الراحة",a:"حكمة"},{t:"القراءة تجدد العقل",a:"حكمة"},{t:"الكتاب يحفظ الوقت",a:"حكمة"},{t:"العلم يورث البركة",a:"حكمة"},{t:"القراءة تكسب المعارف",a:"حكمة"},{t:"الكتاب يوسع المدارك",a:"حكمة"},{t:"العلم يورث النور",a:"حكمة"},{t:"القراءة تغذي الفكر",a:"حكمة"},{t:"الكتاب يبني الحياة",a:"حكمة"},{t:"العلم يورث الجمال",a:"حكمة"},{t:"القراءة تضيء الطريق",a:"حكمة"},{t:"الكتاب يقرأ ولا يُمل",a:"حكمة"},{t:"من أحب أن ينظر إلى رجل أعطاه الله علماً بلا تعب فليقرأ القرآن",a:"علي بن أبي طالب"},{t:"لا حسد إلا في اثنتين",a:"حديث"},{t:"من خرج في طلب العلم فهو في سبيل الله",a:"حديث"},{t:"الكلمة الطيبة صدقة",a:"حديث"},{t:"الكتاب يعطي بلا حدود",a:"حكمة"},{t:"العلم يهدي للحق",a:"حكمة"},{t:"القراءة تفتح الأبواب",a:"حكمة"},{t:"الكتاب نافذة على العالم",a:"حكمة"},{t:"العلم يورث السعادة",a:"حكمة"}
         ];
 
         const benefits=["تنشيط الدماغ","تحسين الذاكرة","زيادة المفردات","تعزيز الكتابة","تحسين التركيز","تقليل التوتر","تحسين النوم","زيادة المعرفة","تعزيز التفكير","تحسين التواصل","زيادة الثقة","تعزيز الإبداع","تحسين الفهم","تقليل الملل","زيادة السعادة","تحسين المزاج","تعلم لغات","تحسين الفهم","زيادة الثقافة","تحسين التحصيل","تعزيز العلاقات","زيادة الوعي","تحسين الذاكرة","تعزيز المنطق","تحليل النصوص","زيادة الإنتاجية","تحسين الحياة","زيادة الفهم","تعزيز النقد","زيادة الوعي","تحسين التركيز","تعزيز الإبداع","زيادة الانتباه","تحسين الاستيعاب","تعزيز المجرد","زيادة الثقافة","تحسين اللفظية","تعزيز الاستنتاج","زيادة الاجتماعي","تحسين المطول","تعزيز المنهجي","زيادة التاريخي","تحليل المواقف","تعزيز المكاني","زيادة العلمي","تحسين الاستنتاج","تعزيز الرياضي","زيادة البيئي","تحسين الرقمية","تنمية الذكاء"];
@@ -553,57 +556,77 @@
         {t:"عدم البيع",d:"الكتب مجانية",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><line x1='12' y1='1' x2='12' y2='23'/></svg>"},
         {t:"البحث السريع",d:"استخدم البحث",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><circle cx='11' cy='11' r='8'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>"},
         {t:"المشاركة",d:"شارك مع الآخرين",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><circle cx='18' cy='5' r='3'/><circle cx='6' cy='12' r='3'/><circle cx='18' cy='19' r='3'/></svg>"},
-        {t:"التقييمات",d:"شاركنا رأيك لتطوير المومقع",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><path d='M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z'/></svg>"}
+        {t:"التقييمات",d:"شاركنا رأيك لتطوير الموقع",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><path d='M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z'/></svg>"}
         ];
 
         let curP='home',curBp=1,curF='all',sq='',curB=null,bpp=18;
         const si=document.getElementById('search'),bg=document.getElementById('bg'),pg=document.getElementById('pg'),bc=document.getElementById('bc'),mo=document.getElementById('mo'),mb=document.getElementById('mb'),me=document.getElementById('me'),ts=document.getElementById('ts');
         
-        // نظام التقييمات - يستخدم localStorage (التقييمات تتحفظ لكل مستخدم على نفس المتصفح)
-        let reviews = JSON.parse(localStorage.getItem('bookReviews')) || [];
+        // نظام التقييمات العام - باستخدام Firebase (كل المستخدمين من كل الأجهزة)
         let currentRating = 5;
-        
-        function renderReviews() {
-            const container = document.getElementById('reviewsList');
-            if(!container) return;
-            if(reviews.length === 0) {
-                container.innerHTML = '<div class="empty-reviews">لا توجد تقييمات بعد، كن أول من يقيم المكتبة!</div>';
-                return;
-            }
-            container.innerHTML = reviews.map(r => `
-                <div class="review-item">
-                    <div class="review-header">
-                        <span class="reviewer-name">${escapeHtml(r.name)}</span>
-                        <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
-                        <span class="review-date">${r.date}</span>
-                    </div>
-                    <div class="review-text">${escapeHtml(r.text)}</div>
-                </div>
-            `).join('');
-        }
         
         function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; }); }
         
-        function addReview(name, text, rating) {
+        function toast(m) { ts.textContent = m; ts.classList.add('show'); setTimeout(() => ts.classList.remove('show'), 2000); }
+        
+        // تحميل التقييمات من Firebase
+        async function loadReviewsFromFirebase() {
+            const container = document.getElementById('reviewsList');
+            if(!container) return;
+            try {
+                const snapshot = await db.collection('reviews').orderBy('timestamp', 'desc').get();
+                if(snapshot.empty) {
+                    container.innerHTML = '<div class="empty-reviews">لا توجد تقييمات بعد، كن أول من يقيم المكتبة!</div>';
+                    return;
+                }
+                let reviewsHtml = '';
+                snapshot.forEach(doc => {
+                    const r = doc.data();
+                    reviewsHtml += `
+                        <div class="review-item">
+                            <div class="review-header">
+                                <span class="reviewer-name">${escapeHtml(r.name)}</span>
+                                <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                                <span class="review-date">${r.date}</span>
+                            </div>
+                            <div class="review-text">${escapeHtml(r.text)}</div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = reviewsHtml;
+            } catch(error) {
+                console.error("خطأ في تحميل التقييمات:", error);
+                container.innerHTML = '<div class="empty-reviews">حدث خطأ في تحميل التقييمات</div>';
+            }
+        }
+        
+        // إضافة تقييم جديد إلى Firebase
+        async function addReviewToFirebase(name, text, rating) {
             if(!name.trim()) { toast('الرجاء كتابة اسمك'); return false; }
             if(!text.trim()) { toast('الرجاء كتابة تعليقك'); return false; }
             
-            const newReview = {
-                id: Date.now(),
-                name: name.trim(),
-                text: text.trim(),
-                rating: rating,
-                date: new Date().toLocaleDateString('ar-EG')
-            };
-            reviews.unshift(newReview);
-            localStorage.setItem('bookReviews', JSON.stringify(reviews));
-            renderReviews();
-            return true;
+            try {
+                await db.collection('reviews').add({
+                    name: name.trim(),
+                    text: text.trim(),
+                    rating: rating,
+                    date: new Date().toLocaleDateString('ar-EG'),
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                });
+                toast('✓ تم إضافة تقييمك! سيظهر للجميع');
+                loadReviewsFromFirebase(); // إعادة تحميل التقييمات
+                return true;
+            } catch(error) {
+                console.error("خطأ في إضافة التقييم:", error);
+                toast('حدث خطأ، حاول مرة أخرى');
+                return false;
+            }
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             anim('st1', books.length);
-            renderCats(); renderQ(); renderB(); renderR(); renderReviews();
+            renderCats(); renderQ(); renderB(); renderR();
+            loadReviewsFromFirebase(); // تحميل التقييمات من السحاب
             
             si.oninput = e => { sq = e.target.value.toLowerCase(); if(curP === 'books') { curBp = 1; renderBooks(); } };
             
@@ -620,21 +643,21 @@
                 };
             });
             starSpans.forEach((s, i) => { if(i < 5) s.textContent = '★'; });
+            currentRating = 5;
             
             document.getElementById('submitReview')?.addEventListener('click', () => {
                 const name = document.getElementById('reviewName').value;
                 const text = document.getElementById('reviewText').value;
-                if(addReview(name, text, currentRating)) {
+                addReviewToFirebase(name, text, currentRating).then(() => {
                     document.getElementById('reviewName').value = '';
                     document.getElementById('reviewText').value = '';
                     starSpans.forEach((s, i) => { if(i < 5) s.textContent = '★'; });
                     currentRating = 5;
-                    toast('شكراً على تقييمك! ');
-                }
+                });
             });
         });
 
-        function nav(p) { curP = p; document.querySelectorAll('.page').forEach(x => x.classList.remove('active')); document.getElementById('p-'+p).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => { l.classList.remove('active'); if(l.dataset.p === p) l.classList.add('active'); }); if(p === 'books') renderBooks(); if(p === 'reviews') renderReviews(); scrollTo(0,0); }
+        function nav(p) { curP = p; document.querySelectorAll('.page').forEach(x => x.classList.remove('active')); document.getElementById('p-'+p).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => { l.classList.remove('active'); if(l.dataset.p === p) l.classList.add('active'); }); if(p === 'books') renderBooks(); if(p === 'reviews') loadReviewsFromFirebase(); scrollTo(0,0); }
         function goCat(c) { curF = c; curBp = 1; nav('books'); setTimeout(() => { document.querySelectorAll('.filter-pill').forEach(p => { p.classList.remove('active'); if(p.dataset.f === c) p.classList.add('active'); }); renderBooks(); }, 50); }
         function anim(id, n) { const el = document.getElementById(id); let c = 0, inc = n/20; const t = setInterval(() => { c += inc; if(c >= n) { el.textContent = n.toLocaleString('ar'); clearInterval(t); } else el.textContent = Math.floor(c).toLocaleString('ar'); }, 30); }
         function renderCats() { const c = [{id:'islamic',n:'إسلامية'},{id:'literature',n:'أدب'},{id:'history',n:'تاريخ'},{id:'science',n:'علوم'},{id:'language',n:'لغة'},{id:'philosophy',n:'فلسفة'},{id:'education',n:'تربية'},{id:'economy',n:'اقتصاد'},{id:'stories',n:'القصص'}]; document.getElementById('cats').innerHTML = c.map(c => `<a href="#" class="category-card" onclick="goCat('${c.id}');return false"><div class="category-img" style="background:linear-gradient(135deg,${cols[c.id]},#1a1512)">${icons[c.id]}</div><div class="category-name">${c.n}</div><div class="category-count">${books.filter(b=>b.c===c.id).length}</div></a>`).join(''); }
@@ -647,7 +670,6 @@
         function go(p) { curBp = p; renderBooks(); scrollTo(0,180); }
         function openBook(id) { curB = books.find(b => b.id === id); if(!curB) return; const rs = '★'.repeat(curB.r); const cn = {islamic:'إسلامي',literature:'أدب',history:'تاريخ',science:'علوم',language:'لغة',philosophy:'فلسفة',education:'تربية',economy:'اقتصاد',stories:'قصص'}; mb.innerHTML = `<div class="modal-book-header"><div class="modal-book-cover" style="background:linear-gradient(135deg,${cols[curB.c]},#1a1512);display:flex;align-items:center;justify-content:center"><div style="text-align:center;padding:12px"><h3 style="color:#fff;font-size:0.85rem;font-family:Amiri">${curB.t}</h3></div></div><div class="modal-book-info"><h2>${curB.t}</h2><p class="modal-book-author">${curB.a}</p><div class="modal-book-meta"><div class="meta-badge">${curB.p} ص</div><div class="meta-badge">${curB.y}</div><div class="meta-badge" style="color:var(--accent-gold)">${rs}</div></div><p class="modal-book-desc">${curB.d}</p><div class="modal-actions"><a href="${curB.u}" target="_blank" class="btn btn-primary"><svg width="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>قراءة</a><button class="btn btn-secondary" onclick="cm()">إغلاق</button></div><div class="download-note">من مكتبة النور</div></div></div>`; me.innerHTML = `<div class="extra-info-item"><h4>المؤلف</h4><p>${curB.a}</p></div><div class="extra-info-item"><h4>الموضوع</h4><p>${curB.s}</p></div><div class="extra-info-item"><h4>الصفحات</h4><p>${curB.p}</p></div><div class="extra-info-item"><h4>السنة</h4><p>${curB.y}</p></div><div class="extra-info-item"><h4>التصنيف</h4><p>${cn[curB.c]}</p></div><div class="extra-info-item"><h4>المصدر</h4><p>مكتبة النور</p></div>`; mo.classList.add('active'); document.body.style.overflow = 'hidden'; }
         function cm() { mo.classList.remove('active'); document.body.style.overflow = ''; }
-        function toast(m) { ts.textContent = m; ts.classList.add('show'); setTimeout(() => ts.classList.remove('show'), 2000); }
 
         function renderFilters() { const f = ['all','islamic','literature','history','science','language','philosophy','education','economy','stories']; const fn = {all:'الكل',islamic:'إسلامية',literature:'أدب',history:'تاريخ',science:'علوم',language:'لغة',philosophy:'فلسفة',education:'تربية',economy:'اقتصاد',stories:'القصص'}; document.getElementById('pills').innerHTML = f.map(c => `<button class="filter-pill${c==='all'?' active':''}" data-f="${c}">${fn[c]}</button>`).join(''); }
         renderFilters();
