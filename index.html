@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>بيت القراءة - مكتبة رقمية شاملة</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-2R4HSN4Z25"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-2R4HSN4Z25');
+    </script>
+    
+    <style>
+        :root { --bg-primary: #1a1512; --bg-secondary: #231d19; --bg-card: #2d2520; --fg-primary: #f5ebe0; --fg-secondary: #b8a898; --accent-gold: #c9a962; --accent-copper: #8b5a2b; --border: #4a3d32; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body { font-family: 'Tajawal', sans-serif; background: var(--bg-primary); color: var(--fg-primary); min-height: 100vh; line-height: 1.8; overflow-x: hidden; }
+        .font-display { font-family: 'Amiri', serif; }
+
+        .intro-screen { position: fixed; inset: 0; background: linear-gradient(135deg, #1a1512, #2d2520); z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.8s, visibility 0.8s; }
+        .intro-screen.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+        .intro-book { position: relative; width: 160px; height: 220px; perspective: 1000px; }
+        .intro-book-cover { position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, var(--accent-gold), var(--accent-copper)); border-radius: 0 12px 12px 0; transform-origin: left center; animation: bookOpen 2s ease-in-out 0.5s forwards; box-shadow: 0 20px 60px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; color: var(--bg-primary); }
+        @keyframes bookOpen { 0% { transform: rotateY(0deg); } 100% { transform: rotateY(-160deg); } }
+        .intro-book-pages { position: absolute; width: 100%; height: 100%; background: linear-gradient(90deg, #f5ebe0, #e8dcc8); border-radius: 0 12px 12px 0; display: flex; align-items: center; justify-content: center; flex-direction: column; text-align: center; padding: 20px; }
+        .intro-book-pages h1 { font-family: 'Amiri', serif; font-size: 1.3rem; color: var(--bg-primary); margin-bottom: 10px; opacity: 0; animation: fadeIn 0.5s ease 2.5s forwards; }
+        .intro-book-pages p { font-size: 0.8rem; color: #5a4a3a; opacity: 0; animation: fadeIn 0.5s ease 2.8s forwards; }
+        @keyframes fadeIn { to { opacity: 1; } }
+        .intro-book-spine { position: absolute; left: 0; top: 0; width: 12px; height: 100%; background: linear-gradient(180deg, var(--accent-copper), #6b4423); border-radius: 4px 0 0 4px; }
+        .intro-enter { position: absolute; bottom: 60px; opacity: 0; animation: fadeIn 0.5s ease 3.2s forwards; }
+        .intro-enter button { padding: 12px 35px; background: linear-gradient(135deg, var(--accent-gold), var(--accent-copper)); color: var(--bg-primary); border: none; border-radius: 25px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Tajawal', sans-serif; }
+        .intro-enter button:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(201, 169, 98, 0.4); }
+
+        .hero-section { min-height: 100vh; position: relative; display: flex; align-items: center; justify-content: center; text-align: center; overflow: hidden; background: linear-gradient(135deg, #1a1512, #2d2520); }
+        .hero-bg { position: absolute; inset: 0; }
+        .glow-effect { position: absolute; width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(201, 169, 98, 0.1), transparent); top: 50%; left: 50%; transform: translate(-50%, -50%); animation: glowPulse 4s ease-in-out infinite; }
+        @keyframes glowPulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.1); } }
+        .floating-books-bg { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+        .floating-book-anim { position: absolute; animation: floatAround 20s ease-in-out infinite; }
+        .floating-book-anim .mini-book { width: 45px; height: 55px; position: relative; perspective: 500px; }
+        .floating-book-anim .mini-cover { position: absolute; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(201,169,98,0.5), rgba(139,90,43,0.5)); border-radius: 2px 6px 6px 2px; transform-origin: left center; animation: miniFlip 3s ease-in-out infinite; }
+        .floating-book-anim .mini-back { position: absolute; width: 100%; height: 100%; background: rgba(107,68,35,0.4); border-radius: 2px 6px 6px 2px; }
+        @keyframes miniFlip { 0%, 100% { transform: rotateY(0deg); } 50% { transform: rotateY(-120deg); } }
+        @keyframes floatAround { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(15px, -20px); } }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent, rgba(26, 21, 18, 1)); }
+        .hero-content { position: relative; z-index: 10; padding: 30px 15px; max-width: 800px; width: 100%; }
+        .hero-title { font-size: clamp(2rem, 6vw, 3.5rem); font-weight: 700; margin-bottom: 12px; background: linear-gradient(135deg, var(--fg-primary), var(--accent-gold), var(--accent-copper)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: clamp(0.9rem, 2.5vw, 1.1rem); color: var(--fg-secondary); margin: 0 auto 25px; line-height: 1.8; padding: 0 10px; }
+        .hero-stats { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 25px; }
+        .stat-card { background: rgba(45, 37, 32, 0.8); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; text-align: center; min-width: 80px; flex: 1; max-width: 120px; }
+        .stat-card:hover { transform: translateY(-2px); border-color: var(--accent-gold); }
+        .stat-number { font-size: 1.4rem; font-weight: 800; color: var(--accent-gold); display: block; }
+        .stat-label { color: var(--fg-secondary); font-size: 10px; margin-top: 2px; }
+
+        .main-header { background: rgba(26, 21, 18, 0.98); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
+        .header-container { max-width: 1200px; margin: 0 auto; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+        .logo-link { display: flex; align-items: center; gap: 6px; text-decoration: none; }
+        .logo-icon { width: 32px; height: 32px; position: relative; }
+        .stacked-book { position: absolute; height: 6px; border-radius: 1px; left: 0; right: 0; }
+        .stacked-book:nth-child(1) { background: linear-gradient(90deg, #c9a962, #a88b45); bottom: 0; transform: rotate(-2deg); }
+        .stacked-book:nth-child(2) { background: linear-gradient(90deg, #b8962f, #8b6914); bottom: 5px; transform: rotate(1deg); }
+        .stacked-book:nth-child(3) { background: linear-gradient(90deg, #9a7a1f, #6b4a0a); bottom: 10px; transform: rotate(-1deg); }
+        .stacked-book:nth-child(4) { background: linear-gradient(90deg, #8b6914, #5a3a0a); bottom: 15px; transform: rotate(2deg); }
+        .site-title { font-size: 1rem; font-weight: 700; background: linear-gradient(135deg, var(--fg-primary), var(--accent-gold)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .main-nav { display: flex; gap: 2px; flex-wrap: wrap; }
+        .nav-link { padding: 5px 8px; border-radius: 5px; color: var(--fg-secondary); text-decoration: none; font-weight: 500; transition: all 0.3s; border: 1px solid transparent; font-size: 11px; }
+        .nav-link:hover, .nav-link.active { background: var(--bg-card); color: var(--fg-primary); border-color: var(--border); }
+        .nav-link.active { border-color: var(--accent-gold); color: var(--accent-gold); }
+        .search-input { padding: 6px 10px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; color: var(--fg-primary); font-size: 11px; width: 120px; }
+        .search-input:focus { outline: none; border-color: var(--accent-gold); }
+
+        .features-section { padding: 50px 15px; background: var(--bg-secondary); }
+        .categories-section { padding: 50px 15px; }
+        .home-bottom-section { padding: 50px 15px; background: var(--bg-secondary); }
+        .section-title { font-size: clamp(1.3rem, 4vw, 1.6rem); font-weight: 700; text-align: center; margin-bottom: 30px; }
+        .section-title::after { content: ''; display: block; width: 35px; height: 2px; background: var(--accent-gold); margin: 8px auto 0; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; max-width: 800px; margin: 0 auto; }
+        .feature-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 18px; text-align: center; transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-3px); border-color: var(--accent-gold); }
+        .feature-icon { width: 38px; height: 38px; margin: 0 auto 10px; background: linear-gradient(135deg, var(--accent-gold), var(--accent-copper)); border-radius: 8px; display: flex; align-items: center; justify-content: center; }
+        .feature-title { font-size: 0.85rem; font-weight: 700; margin-bottom: 4px; }
+        .feature-desc { color: var(--fg-secondary); font-size: 11px; }
+        .categories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 800px; margin: 0 auto; }
+        .category-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; transition: all 0.3s; text-decoration: none; color: inherit; }
+        .category-card:hover { transform: translateY(-2px); border-color: var(--accent-gold); }
+        .category-img { width: 100%; height: 50px; border-radius: 5px; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; }
+        .category-img svg { width: 28px; height: 28px; }
+        .category-name { font-size: 0.75rem; font-weight: 600; }
+        .category-count { color: var(--fg-secondary); font-size: 9px; }
+
+        .about-section { padding: 50px 15px; }
+        .about-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 25px 20px; max-width: 700px; margin: 0 auto; }
+        .about-box h2 { font-size: 1.2rem; margin-bottom: 12px; text-align: center; color: var(--accent-gold); }
+        .about-box p { color: var(--fg-secondary); line-height: 1.8; margin-bottom: 10px; font-size: 12px; }
+
+        .sources-box { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; max-width: 500px; margin: 0 auto; }
+        .source-item { display: flex; gap: 12px; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid var(--border); }
+        .source-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
+        .source-icon { width: 38px; height: 38px; border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .source-icon.noor { background: linear-gradient(135deg, #22c55e, #15803d); }
+        .source-info h4 { font-size: 0.85rem; margin-bottom: 3px; }
+        .source-info p { color: var(--fg-secondary); font-size: 11px; line-height: 1.6; margin-bottom: 6px; }
+        .source-link { display: inline-block; color: var(--accent-gold); font-size: 10px; text-decoration: none; font-weight: 600; }
+        .source-link:hover { text-decoration: underline; }
+
+        .quick-links-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; max-width: 900px; margin: 0 auto 30px; }
+        .quick-link-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 15px 8px; text-align: center; transition: all 0.3s; text-decoration: none; color: inherit; }
+        .quick-link-card:hover { transform: translateY(-2px); border-color: var(--accent-gold); }
+        .quick-link-card h3 { font-size: 0.8rem; margin-bottom: 4px; color: var(--accent-gold); }
+        .quick-link-card p { color: var(--fg-secondary); font-size: 9px; }
+
+        .credits-box { background: linear-gradient(135deg, rgba(201, 168, 98, 0.08), transparent); border: 1px solid rgba(201, 168, 98, 0.2); border-radius: 8px; padding: 15px; text-align: center; max-width: 550px; margin: 20px auto 0; }
+        .credits-box p { color: var(--fg-secondary); font-size: 11px; margin-bottom: 4px; }
+
+        .books-section { padding: 30px 12px 50px; }
+        .books-header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; max-width: 900px; margin-left: auto; margin-right: auto; }
+        .books-header h1 { font-size: 1rem; font-weight: 700; }
+        .books-header p { color: var(--fg-secondary); font-size: 10px; }
+        .filter-pills { display: flex; gap: 3px; flex-wrap: wrap; }
+        .filter-pill { padding: 4px 8px; border-radius: 12px; background: var(--bg-card); border: 1px solid var(--border); color: var(--fg-secondary); cursor: pointer; font-size: 9px; }
+        .filter-pill:hover { border-color: var(--accent-gold); }
+        .filter-pill.active { background: var(--accent-gold); color: var(--bg-primary); border-color: var(--accent-gold); }
+        .books-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 600px; margin: 0 auto; }
+        .book-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; cursor: pointer; transition: all 0.3s; }
+        .book-card:hover { transform: translateY(-3px); border-color: var(--accent-gold); }
+        .book-cover { height: 120px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .book-cover-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, transparent 40%, rgba(0,0,0,0.7) 100%); }
+        .book-badge { position: absolute; top: 4px; right: 4px; padding: 1px 5px; border-radius: 10px; font-size: 7px; font-weight: 600; background: rgba(139, 90, 43, 0.9); }
+        .book-source { position: absolute; bottom: 4px; left: 4px; padding: 1px 4px; border-radius: 3px; font-size: 6px; background: rgba(0,0,0,0.7); color: #4ade80; }
+        .book-info { padding: 8px; }
+        .book-title { font-size: 0.68rem; font-weight: 700; margin-bottom: 2px; line-height: 1.2; }
+        .book-author { color: var(--accent-gold); font-size: 9px; margin-bottom: 2px; }
+        .book-meta { display: flex; align-items: center; justify-content: space-between; color: var(--fg-secondary); font-size: 8px; }
+        .book-rating { color: var(--accent-gold); }
+
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.9); z-index: 1000; display: none; align-items: flex-start; justify-content: center; padding: 15px 10px; overflow-y: auto; }
+        .modal-overlay.active { display: flex; }
+        .modal-content { background: var(--bg-secondary); border-radius: 12px; max-width: 450px; width: 100%; border: 1px solid var(--border); position: relative; margin: 10px 0; animation: modalIn 0.3s ease; }
+        @keyframes modalIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .modal-close { position: absolute; top: 8px; left: 8px; width: 26px; height: 26px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--fg-primary); z-index: 10; font-size: 12px; }
+        .modal-close:hover { background: #8b2942; }
+        .modal-body { padding: 15px; }
+        .modal-book-header { display: block; margin-bottom: 12px; text-align: center; }
+        .modal-book-cover { width: 120px; height: 160px; margin: 0 auto 12px; border-radius: 6px; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
+        .modal-book-info h2 { font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+        .modal-book-author { font-size: 0.8rem; color: var(--accent-gold); margin-bottom: 6px; }
+        .modal-book-meta { display: flex; justify-content: center; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; }
+        .meta-badge { background: var(--bg-card); padding: 3px 7px; border-radius: 5px; font-size: 9px; }
+        .modal-book-desc { color: var(--fg-secondary); line-height: 1.6; margin-bottom: 10px; font-size: 11px; text-align: center; }
+        .modal-actions { display: flex; gap: 5px; justify-content: center; flex-wrap: wrap; }
+        .btn { padding: 8px 14px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 5px; text-decoration: none; transition: all 0.3s; }
+        .btn-primary { background: linear-gradient(135deg, var(--accent-gold), var(--accent-copper)); color: var(--bg-primary); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(201,169,98,0.3); }
+        .btn-secondary { background: var(--bg-card); color: var(--fg-primary); border: 1px solid var(--border); }
+        .btn-secondary:hover { border-color: var(--accent-gold); }
+        .modal-extra-info { border-top: 1px solid var(--border); padding: 10px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .extra-info-item { background: var(--bg-card); padding: 6px; border-radius: 5px; text-align: center; }
+        .extra-info-item h4 { font-size: 7px; color: var(--fg-secondary); margin-bottom: 1px; }
+        .extra-info-item p { font-size: 0.65rem; font-weight: 600; }
+        .download-note { background: rgba(34, 197, 94, 0.1); border: 1px solid rgba(34, 197, 94, 0.3); border-radius: 5px; padding: 8px; margin-top: 8px; font-size: 10px; color: #4ade80; text-align: center; }
+        
+        .pagination { display: flex; justify-content: center; gap: 3px; margin-top: 20px; flex-wrap: wrap; }
+        .page-btn { padding: 5px 8px; background: var(--bg-card); border: 1px solid var(--border); border-radius: 5px; color: var(--fg-primary); cursor: pointer; font-size: 9px; }
+        .page-btn:hover, .page-btn.active { background: var(--accent-gold); color: var(--bg-primary); border-color: var(--accent-gold); }
+        
+        .content-section { padding: 40px 12px; }
+        .content-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 22px; max-width: 600px; margin: 0 auto; }
+        .content-card h1 { font-size: 1.2rem; margin-bottom: 15px; text-align: center; }
+        .content-card p { color: var(--fg-secondary); line-height: 1.8; margin-bottom: 10px; font-size: 11px; }
+        .quotes-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 700px; margin: 0 auto; }
+        .quote-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 10px; position: relative; }
+        .quote-card:hover { border-color: var(--accent-gold); }
+        .quote-mark { font-size: 1.4rem; color: var(--accent-gold); opacity: 0.2; position: absolute; top: 2px; right: 6px; font-family: 'Amiri', serif; }
+        .quote-text { font-size: 0.7rem; line-height: 1.4; margin-bottom: 4px; font-style: italic; }
+        .quote-author { color: var(--accent-gold); font-weight: 600; font-size: 0.6rem; }
+        .benefits-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; max-width: 700px; margin: 0 auto; }
+        .benefit-item { background: var(--bg-card); border: 1px solid var(--border); border-radius: 6px; padding: 10px; }
+        .benefit-item:hover { border-color: var(--accent-gold); }
+        .benefit-item h3 { font-size: 0.7rem; font-weight: 700; margin-bottom: 2px; display: flex; align-items: center; gap: 4px; }
+        .benefit-item h3::before { content: ''; width: 4px; height: 4px; background: var(--accent-gold); border-radius: 50%; }
+        .benefit-item p { color: var(--fg-secondary); font-size: 9px; margin: 0; }
+        .rules-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; max-width: 500px; margin: 0 auto; }
+        .rule-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
+        .rule-card:hover { border-color: var(--accent-gold); }
+        .rule-icon { width: 32px; height: 32px; margin: 0 auto 8px; background: linear-gradient(135deg, var(--accent-gold), var(--accent-copper)); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .rule-title { font-size: 0.8rem; font-weight: 700; margin-bottom: 3px; }
+        .rule-desc { color: var(--fg-secondary); font-size: 10px; }
+        
+        .reviews-section { max-width: 750px; margin: 0 auto; }
+        .review-form-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 25px; }
+        .review-form-card h3 { font-size: 1rem; margin-bottom: 12px; color: var(--accent-gold); text-align: center; }
+        .review-input, .review-textarea { width: 100%; background: var(--bg-primary); border: 1px solid var(--border); border-radius: 8px; padding: 10px; color: var(--fg-primary); font-size: 12px; margin-bottom: 12px; font-family: 'Tajawal', sans-serif; }
+        .review-textarea { min-height: 80px; resize: vertical; }
+        .star-label { text-align: center; margin-bottom: 8px; font-size: 13px; color: var(--fg-secondary); }
+        .star-rating { display: flex; gap: 8px; margin-bottom: 15px; justify-content: center; }
+        .star-rating span { font-size: 28px; cursor: pointer; color: var(--fg-secondary); transition: 0.2s; }
+        .star-rating span.active, .star-rating span:hover { color: var(--accent-gold); }
+        .reviews-list { display: flex; flex-direction: column; gap: 12px; max-height: 500px; overflow-y: auto; padding-left: 5px; }
+        .review-item { background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; padding: 14px; transition: 0.2s; }
+        .review-item:hover { border-color: var(--accent-gold); }
+        .review-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+        .reviewer-name { font-weight: 700; color: var(--accent-gold); font-size: 0.8rem; }
+        .review-stars { color: var(--accent-gold); font-size: 12px; letter-spacing: 1px; }
+        .review-date { color: var(--fg-secondary); font-size: 9px; }
+        .review-text { color: var(--fg-primary); font-size: 12px; line-height: 1.6; margin-top: 6px; }
+        .empty-reviews { text-align: center; padding: 30px; color: var(--fg-secondary); }
+        
+        .main-footer { background: var(--bg-secondary); border-top: 1px solid var(--border); padding: 30px 12px 15px; }
+        .footer-content { max-width: 700px; margin: 0 auto 15px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .footer-section h3 { font-size: 0.8rem; margin-bottom: 8px; color: var(--accent-gold); }
+        .footer-section a, .footer-section p { color: var(--fg-secondary); text-decoration: none; font-size: 10px; display: block; padding: 2px 0; }
+        .footer-section a:hover { color: var(--accent-gold); }
+        .footer-bottom { text-align: center; padding-top: 15px; border-top: 1px solid var(--border); color: var(--fg-secondary); font-size: 9px; }
+        .toast { position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%) translateY(50px); background: linear-gradient(135deg, var(--accent-copper), #5c3d1e); color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; z-index: 2000; opacity: 0; transition: all 0.3s; font-size: 11px; }
+        .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        @media (min-width: 769px) {
+            .intro-book { width: 180px; height: 240px; }
+            .intro-book-pages h1 { font-size: 1.5rem; }
+            .intro-enter { bottom: 80px; }
+            .intro-enter button { padding: 14px 40px; font-size: 16px; }
+            .glow-effect { width: 500px; height: 500px; }
+            .floating-book-anim .mini-book { width: 50px; height: 65px; }
+            .hero-content { padding: 40px 20px; }
+            .hero-title { font-size: 3.5rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .stat-card { padding: 18px 22px; min-width: 100px; }
+            .stat-number { font-size: 1.8rem; }
+            .header-container { padding: 10px 20px; }
+            .logo-icon { width: 40px; height: 40px; }
+            .stacked-book { height: 8px; }
+            .site-title { font-size: 1.2rem; }
+            .nav-link { padding: 8px 12px; font-size: 12px; }
+            .search-input { width: 180px; font-size: 12px; }
+            .features-section, .categories-section, .home-bottom-section { padding: 60px 20px; }
+            .section-title { font-size: 1.6rem; margin-bottom: 35px; }
+            .features-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; max-width: 1000px; }
+            .feature-card { padding: 22px; }
+            .feature-icon { width: 45px; height: 45px; }
+            .feature-title { font-size: 0.95rem; }
+            .categories-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 12px; max-width: 1000px; }
+            .category-card { padding: 15px 10px; }
+            .category-img { height: 70px; }
+            .about-section { padding: 60px 20px; }
+            .about-box { padding: 30px; }
+            .sources-box { padding: 25px; max-width: 700px; }
+            .quick-links-grid { grid-template-columns: repeat(5, 1fr); gap: 15px; max-width: 1000px; }
+            .quick-link-card { padding: 15px; }
+            .credits-box { padding: 18px; max-width: 650px; }
+            .books-section { padding: 40px 20px 60px; }
+            .books-header { gap: 12px; margin-bottom: 25px; max-width: 1100px; }
+            .books-grid { grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 12px; max-width: 1100px; }
+            .book-cover { height: 175px; }
+            .book-badge { top: 6px; right: 6px; padding: 2px 7px; font-size: 8px; }
+            .book-info { padding: 10px; }
+            .book-title { font-size: 0.75rem; }
+            .book-author { font-size: 10px; }
+            .book-meta { font-size: 9px; }
+            .books-header h1 { font-size: 1.1rem; }
+            .books-header p { font-size: 11px; }
+            .filter-pill { padding: 5px 10px; font-size: 10px; }
+            .modal-overlay { padding: 20px; }
+            .modal-content { max-width: 700px; }
+            .modal-body { padding: 20px; }
+            .modal-book-header { display: grid; grid-template-columns: 180px 1fr; gap: 18px; margin-bottom: 15px; text-align: right; }
+            .modal-book-cover { width: auto; height: 220px; margin: 0; }
+            .modal-book-info h2 { font-size: 1.1rem; }
+            .modal-book-author { font-size: 0.85rem; }
+            .modal-book-meta { justify-content: flex-start; }
+            .modal-book-desc { font-size: 12px; text-align: right; }
+            .modal-actions { justify-content: flex-start; }
+            .modal-book-desc { line-height: 1.7; }
+            .modal-extra-info { padding: 14px; gap: 8px; }
+            .extra-info-item { padding: 8px; }
+            .extra-info-item h4 { font-size: 8px; }
+            .extra-info-item p { font-size: 0.75rem; }
+            .download-note { padding: 10px; font-size: 11px; }
+            .pagination { gap: 3px; margin-top: 30px; }
+            .page-btn { padding: 6px 10px; font-size: 10px; }
+            .content-section { padding: 45px 20px; }
+            .content-card { padding: 28px; max-width: 700px; }
+            .content-card h1 { font-size: 1.4rem; }
+            .content-card p { font-size: 12px; }
+            .quotes-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; max-width: 1100px; }
+            .quote-card { padding: 14px; }
+            .quote-mark { font-size: 1.8rem; top: 3px; right: 8px; }
+            .quote-text { font-size: 0.78rem; margin-bottom: 6px; }
+            .quote-author { font-size: 0.7rem; }
+            .benefits-grid { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; max-width: 1100px; }
+            .benefit-item { padding: 12px; }
+            .benefit-item h3 { font-size: 0.78rem; }
+            .benefit-item h3::before { width: 5px; height: 5px; }
+            .benefit-item p { font-size: 10px; }
+            .rules-grid { grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 700px; }
+            .rule-card { padding: 18px; }
+            .rule-icon { width: 40px; height: 40px; margin-bottom: 10px; }
+            .rule-title { font-size: 0.88rem; }
+            .rule-desc { font-size: 11px; }
+            .main-footer { padding: 35px 20px 18px; }
+            .footer-content { max-width: 850px; gap: 20px; }
+            .footer-section h3 { font-size: 0.85rem; }
+            .footer-section a, .footer-section p { font-size: 11px; }
+            .footer-bottom { padding-top: 18px; font-size: 10px; }
+            .toast { bottom: 18px; padding: 10px 20px; font-size: 12px; }
+            .reviews-list { max-height: 550px; }
+        }
+
+        @media (max-width: 360px) {
+            .categories-grid { grid-template-columns: repeat(2, 1fr); }
+            .books-grid { grid-template-columns: repeat(2, 1fr); }
+            .quotes-grid { grid-template-columns: 1fr; }
+            .benefits-grid { grid-template-columns: 1fr; }
+            .rules-grid { grid-template-columns: 1fr; }
+            .quick-links-grid { grid-template-columns: repeat(2, 1fr); }
+            .footer-content { grid-template-columns: 1fr; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="intro-screen" id="introScreen">
+        <div class="intro-book">
+            <div class="intro-book-pages"><h1>بيت القراءة</h1><p>مكتبة رقمية شاملة</p></div>
+            <div class="intro-book-cover"><svg width="50" height="50" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4a2 2 0 00-2-2H6.5A2.5 2.5 0 004 4.5v15z"/><path d="M12 7v6M9 10h6" stroke-width="2"/></svg></div>
+            <div class="intro-book-spine"></div>
+        </div>
+        <div class="intro-enter"><button onclick="enterSite()">ادخل المكتبة</button></div>
+    </div>
+
+    <header class="main-header">
+        <div class="header-container">
+            <a href="#" class="logo-link" onclick="nav('home');return false;"><div class="logo-icon"><div class="stacked-book"></div><div class="stacked-book"></div><div class="stacked-book"></div><div class="stacked-book"></div></div><span class="site-title font-display">بيت القراءة</span></a>
+            <nav class="main-nav">
+                <a href="#" class="nav-link active" data-p="home" onclick="nav('home');return false;">الرئيسية</a>
+                <a href="#" class="nav-link" data-p="books" onclick="nav('books');return false;">المكتبة</a>
+                <a href="#" class="nav-link" data-p="about" onclick="nav('about');return false;">عن الموقع</a>
+                <a href="#" class="nav-link" data-p="quotes" onclick="nav('quotes');return false;">اقتباسات</a>
+                <a href="#" class="nav-link" data-p="benefits" onclick="nav('benefits');return false;">فوائد</a>
+                <a href="#" class="nav-link" data-p="rules" onclick="nav('rules');return false;">قواعد</a>
+                <a href="#" class="nav-link" data-p="reviews" onclick="nav('reviews');return false;">تقييمات</a>
+            </nav>
+            <input type="search" class="search-input" id="search" placeholder="ابحث...">
+        </div>
+    </header>
+
+    <main>
+        <div id="p-home" class="page active">
+            <section class="hero-section">
+                <div class="hero-bg">
+                    <div class="glow-effect"></div>
+                    <div class="floating-books-bg">
+                        <div class="floating-book-anim" style="top:15%;left:8%;"><div class="mini-book"><div class="mini-back"></div><div class="mini-cover"></div></div></div>
+                        <div class="floating-book-anim" style="top:25%;right:12%;"><div class="mini-book"><div class="mini-back"></div><div class="mini-cover"></div></div></div>
+                        <div class="floating-book-anim" style="bottom:25%;left:5%;"><div class="mini-book"><div class="mini-back"></div><div class="mini-cover"></div></div></div>
+                        <div class="floating-book-anim" style="top:60%;right:8%;"><div class="mini-book"><div class="mini-back"></div><div class="mini-cover"></div></div></div>
+                        <div class="floating-book-anim" style="top:40%;left:15%;"><div class="mini-book"><div class="mini-back"></div><div class="mini-cover"></div></div></div>
+                    </div>
+                </div>
+                <div class="hero-overlay"></div>
+                <div class="hero-content">
+                    <h1 class="hero-title font-display">بيت القراءة</h1>
+                    <p class="hero-subtitle">مكتبة رقمية شاملة - تحميل كتب PDF مجاناً من مكتبة النور</p>
+                    <button class="btn btn-primary" onclick="nav('books')">تصفح المكتبة</button>
+                    <div class="hero-stats"><div class="stat-card"><span class="stat-number" id="st1">0</span><span class="stat-label">كتاب</span></div><div class="stat-card"><span class="stat-number">1</span><span class="stat-label">مصدر</span></div><div class="stat-card"><span class="stat-number">10K</span><span class="stat-label">تحميل</span></div></div>
+                </div>
+            </section>
+
+            <section class="features-section"><h2 class="section-title font-display">لماذا بيت القراءة؟</h2><div class="features-grid"><div class="feature-card"><div class="feature-icon"><svg width="20" viewBox="0 0 24 24" fill="none" stroke="#1a1512" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div><h3 class="feature-title">تحميل PDF مجاني</h3><p class="feature-desc">كتب كاملة</p></div><div class="feature-card"><div class="feature-icon"><svg width="20" viewBox="0 0 24 24" fill="none" stroke="#1a1512" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg></div><h3 class="feature-title">مكتبة شاملة</h3><p class="feature-desc">كتب عربية</p></div><div class="feature-card"><div class="feature-icon"><svg width="20" viewBox="0 0 24 24" fill="none" stroke="#1a1512" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg></div><h3 class="feature-title">مصادر موثوقة</h3><p class="feature-desc">مكتبة النور</p></div><div class="feature-card"><div class="feature-icon"><svg width="20" viewBox="0 0 24 24" fill="none" stroke="#1a1512" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg></div><h3 class="feature-title">سهولة الوصول</h3><p class="feature-desc">للجميع</p></div></div></section>
+
+            <section class="categories-section"><h2 class="section-title font-display">التصنيفات</h2><div class="categories-grid" id="cats"></div></section>
+
+            <section class="about-section"><div class="about-box"><h2 class="font-display">عن بيت القراءة</h2><p>بيت القراءة مكتبة رقمية شاملة تهدف إلى نشر العلم النافع وتسهيل الوصول إلى الكتب القيمة من خلال مكتبة النور.</p></div></section>
+
+            <section class="home-bottom-section">
+                <h2 class="section-title font-display">روابط سريعة</h2>
+                <div class="quick-links-grid">
+                    <a href="#" class="quick-link-card" onclick="nav('home');return false"><h3>الرئيسية</h3><p>الصفحة الرئيسية</p></a>
+                    <a href="#" class="quick-link-card" onclick="nav('books');return false"><h3>المكتبة</h3><p>تحميل PDF</p></a>
+                    <a href="#" class="quick-link-card" onclick="goCat('stories');return false"><h3>القصص</h3><p>قصص للأطفال</p></a>
+                    <a href="#" class="quick-link-card" onclick="nav('quotes');return false"><h3>اقتباسات</h3><p>حكم وعبر</p></a>
+                    <a href="#" class="quick-link-card" onclick="nav('benefits');return false"><h3>فوائد القراءة</h3><p>فوائد عظيمة</p></a>
+                </div>
+
+                <div class="sources-box">
+                    <div class="source-item"><div class="source-icon noor"><svg width="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4a2 2 0 00-2-2H6.5A2.5 2.5 0 004 4.5v15z"/></svg></div><div class="source-info"><h4>مكتبة النور</h4><p>أكبر مكتبة عربية مجانية</p><a href="https://www.noor-book.com" target="_blank" class="source-link">زيارة المكتبة</a></div></div>
+                </div>
+
+                <div class="credits-box">
+                    <p>إعداد: ملاك عامر عياصرة</p>
+                    <p style="color: #e8b64a; font-weight: 600;">مدرسة ساكب الثانوية للبنات</p>
+                    <p>مديرة المدرسة: نسرين عساسفة</p>
+                    <p>بإشراف معلمات اللغة العربية: خديجة العفيف و سحر سوالمة</p>
+                    <p>بإشراف معلمة الحاسوب: سنابل العتوم</p>
+                </div>
+            </section>
+        </div>
+
+        <div id="p-books" class="page"><section class="books-section"><div class="books-header"><div><h1 class="font-display">المكتبة</h1><p id="bc">عرض الكتب</p></div><div class="filter-pills" id="pills"></div></div><div class="books-grid" id="bg"></div><div class="pagination" id="pg"></div></section></div>
+
+        <div id="p-about" class="page">
+            <section class="content-section">
+                <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 20px; padding: 30px 25px; max-width: 900px; margin: 0 auto;">
+                    <div style="margin-bottom: 35px;">
+                        <h2 style="color: var(--accent-gold); font-size: 1.5rem; margin-bottom: 15px; border-right: 4px solid var(--accent-gold); padding-right: 15px;"> من نحن</h2>
+                        <p style="color: var(--fg-secondary); line-height: 1.8; font-size: 0.95rem;">بيت القراءة هو مشروع طلابي ثقافي تأسس في مدرسة ساكب الثانوية للبنات، يهدف إلى توفير مكتبة رقمية شاملة تجمع أهم الكتب العربية والإسلامية في مكان واحد سهل الوصول. نسعى من خلال هذا المشروع إلى تشجيع القراءة ونشر المعرفة بين الطلاب والطالبات، وتسهيل الوصول إلى المصادر العلمية والثقافية الموثوقة.</p>
+                    </div>
+                    <div style="margin-bottom: 35px;">
+                        <h2 style="color: var(--accent-gold); font-size: 1.5rem; margin-bottom: 15px; border-right: 4px solid var(--accent-gold); padding-right: 15px;"> رسالتنا</h2>
+                        <p style="color: var(--fg-secondary); line-height: 1.8; font-size: 0.95rem;">نشر العلم النافع وتسهيل الوصول إلى الكتب القيمة لكل طالب وطالبة، وبناء جيل قارئ واعٍ يمتلك أدوات المعرفة والتفكير النقدي. نؤمن بأن القراءة هي مفتاح النجاح والتقدم، ونعمل على إتاحة المصادر المعرفية للجميع بشكل مجاني وسهل.</p>
+                    </div>
+                    <div style="margin-bottom: 35px;">
+                        <h2 style="color: var(--accent-gold); font-size: 1.5rem; margin-bottom: 15px; border-right: 4px solid var(--accent-gold); padding-right: 15px;"> أهدافنا</h2>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">
+                            <div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; border: 1px solid var(--border);"><span style="color: var(--accent-gold); margin-left: 8px;">✓</span> توفير مكتبة رقمية شاملة تحتوي على أهم الكتب العربية والإسلامية</div>
+                            <div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; border: 1px solid var(--border);"><span style="color: var(--accent-gold); margin-left: 8px;">✓</span> تشجيع الطلاب والطالبات على القراءة والتعلم المستمر</div>
+                            <div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; border: 1px solid var(--border);"><span style="color: var(--accent-gold); margin-left: 8px;">✓</span> تسهيل الوصول إلى المصادر المعرفية الموثوقة مجاناً</div>
+                            <div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; border: 1px solid var(--border);"><span style="color: var(--accent-gold); margin-left: 8px;">✓</span> نشر الثقافة والوعي بين أفراد المجتمع</div>
+                            <div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; border: 1px solid var(--border);"><span style="color: var(--accent-gold); margin-left: 8px;">✓</span> دعم البحث العلمي والمعرفي للطلاب</div>
+                            <div style="background: var(--bg-secondary); border-radius: 10px; padding: 12px 15px; border: 1px solid var(--border);"><span style="color: var(--accent-gold); margin-left: 8px;">✓</span> الحفاظ على التراث العربي والإسلامي من خلال الرقمنة</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 20px;">
+                        <h2 style="color: var(--accent-gold); font-size: 1.5rem; margin-bottom: 15px; border-right: 4px solid var(--accent-gold); padding-right: 15px;"> فريق العمل</h2>
+                        <p style="color: var(--fg-secondary); line-height: 1.8; font-size: 0.95rem;">هذا المشروع من إعداد الطالبة <strong style="color: var(--accent-gold);">ملاك عامر عياصرة</strong>، بإشراف مديرة المدرسة الأستاذة <strong style="color: var(--accent-gold);">نسرين عساسفة</strong>، وبالتعاون مع معلمات اللغة العربية الأستاذة <strong style="color: var(--accent-gold);">خديجة العفيف</strong> والأستاذة <strong style="color: var(--accent-gold);">سحر سوالمة</strong>، ومعلمة الحاسوب الأستاذة <strong style="color: var(--accent-gold);">سنابل العتوم</strong>.</p>
+                        <p style="color: var(--fg-secondary); line-height: 1.8; font-size: 0.95rem; margin-top: 15px;">نتمنى أن يكون هذا المشروع خطوة عملية نحو بناء جيل قارئ ومثقف قادر على مواجهة تحديات المستقبل.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div id="p-quotes" class="page"><section class="content-section"><h1 class="section-title font-display">اقتباسات</h1><div class="quotes-grid" id="qg"></div></section></div>
+        <div id="p-benefits" class="page"><section class="content-section"><h1 class="section-title font-display">فوائد القراءة</h1><div class="benefits-grid" id="bng"></div></section></div>
+        <div id="p-rules" class="page"><section class="content-section"><h1 class="section-title font-display">قواعد المكتبة</h1><div class="rules-grid" id="rg"></div></section></div>
+        
+        <!-- صفحة التقييمات -->
+        <div id="p-reviews" class="page">
+            <section class="content-section">
+                <h1 class="section-title font-display">آراء القرّاء</h1>
+                <div class="reviews-section">
+                    <div class="review-form-card">
+                        <h3> أضف تقييمك</h3>
+                        <input type="text" id="reviewName" class="review-input" placeholde:="الاسم" required>
+                        <div class="star-label"> التقييم </div>
+                        <div class="star-rating" id="starRating">
+                            <span data-val="1">☆</span>
+                            <span data-val="2">☆</span>
+                            <span data-val="3">☆</span>
+                            <span data-val="4">☆</span>
+                            <span data-val="5">☆</span>
+                        </div>
+                        <textarea id="reviewText" class="review-textarea" placeholder="تعليقك..."></textarea>
+                        <button class="btn btn-primary" id="submitReview" style="width:100%">إرسال التقييم</button>
+                    </div>
+                    <div class="reviews-list" id="reviewsList">
+                        <div class="empty-reviews">لا توجد تقييمات بعد، كن أول من يقيم المكتبة!</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="mo"><div class="modal-content"><button class="modal-close" onclick="cm()">X</button><div class="modal-body" id="mb"></div><div class="modal-extra-info" id="me"></div></div></div>
+
+    <footer class="main-footer"><div class="footer-content"><div class="footer-section"><h3>بيت القراءة</h3><p>تحميل PDF مجاني</p></div><div class="footer-section"><h3>روابط</h3><a href="#" onclick="nav('home');return false">الرئيسية</a><a href="#" onclick="nav('books');return false">المكتبة</a></div><div class="footer-section"><h3>تصنيفات</h3><a href="#" onclick="goCat('islamic');return false">إسلامية</a><a href="#" onclick="goCat('stories');return false">القصص</a></div></div><div class="footer-bottom"><p>2026 جميع الحقوق محفوظة</p></div></footer>
+    <div class="toast" id="ts"></div>
+
+    <script>
+        function enterSite(){document.getElementById('introScreen').classList.add('hide');}
+        setTimeout(()=>{if(!document.getElementById('introScreen').classList.contains('hide'))enterSite();},4000);
+
+        const cols={islamic:'#1a5a42',literature:'#6b4423',history:'#2a4a6b',science:'#4a2a5d',language:'#5d4a1a',philosophy:'#3d2a4a',education:'#1a4d5d',economy:'#5d3a1a',stories:'#e91e63'};
+        const icons={islamic:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><path d="M12 2L2 7l10 5 10-5z"/></svg>',literature:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>',history:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><circle cx="12" cy="12" r="10"/></svg>',science:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><path d="M9 3h6v5l4 9H5l4-9V3z"/></svg>',language:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><circle cx="12" cy="12" r="10"/></svg>',philosophy:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><circle cx="12" cy="12" r="10"/></svg>',education:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><path d="M2 17l10 5 10-5-10-5z"/></svg>',economy:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><line x1="12" y1="1" x2="12" y2="23"/></svg>',stories:'<svg viewBox="0 0 24 24" fill="none" stroke="white"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 10-16 0"/></svg>'};
+
+        const books=[],base=[
+        {t:"صحيح البخاري",a:"الإمام البخاري",c:"islamic",p:2360,y:"256هـ",r:5,d:"أصح كتب الحديث النبوي الشريف",s:"حديث",u:"https://www.noor-book.com/كتاب-صحيح-البخاري-pdf"},
+        {t:"صحيح مسلم",a:"الإمام مسلم",c:"islamic",p:1890,y:"261هـ",r:5,d:"ثاني أصح كتب الحديث",s:"حديث",u:"https://www.noor-book.com/كتاب-صحيح-مسلم-pdf"},
+        {t:"تفسير ابن كثير",a:"ابن كثير",c:"islamic",p:3200,y:"774هـ",r:5,d:"أعظم التفاسير القرآنية",s:"تفسير",u:"https://www.noor-book.com/كتاب-تفسير-ابن-كثير-pdf"},
+        {t:"رياض الصالحين",a:"النووي",c:"islamic",p:680,y:"676هـ",r:5,d:"أحاديث في الآداب والأخلاق",s:"حديث",u:"https://www.noor-book.com/كتاب-رياض-الصالحين-pdf"},
+        {t:"حصن المسلم",a:"سعيد القحطاني",c:"islamic",p:180,y:"1993",r:5,d:"أذكار وأدعية يومية",s:"دعاء",u:"https://www.noor-book.com/كتاب-حصن-المسلم-pdf"},
+        {t:"نهج البلاغة",a:"الشريف الرضي",c:"islamic",p:800,y:"406هـ",r:5,d:"خطب الإمام علي",s:"خطب",u:"https://www.noor-book.com/كتاب-نهج-البلاغة-pdf"},
+        {t:"الأذكار النووية",a:"النووي",c:"islamic",p:400,y:"676هـ",d:"أذكار المسلم",s:"أذكار",u:"https://www.noor-book.com/كتاب-الأذكار-النووية-pdf"},
+        {t:"إحياء علوم الدين",a:"الغزالي",c:"islamic",p:2500,y:"505هـ",r:5,d:"موسوعة في التربية والأخلاق",s:"تربية",u:"https://www.noor-book.com/كتاب-إحياء-علوم-الدين-pdf"},
+        {t:"مقامات الحريري",a:"الحريري",c:"literature",p:200,y:"516هـ",r:5,d:"تحفة أدبية في البلاغة",s:"أدب",u:"https://www.noor-book.com/كتاب-مقامات-الحريري-pdf"},
+        {t:"كليلة ودمنة",a:"ابن المقفع",c:"literature",p:120,y:"142هـ",r:5,d:"حكم وقصص بأسلوب رمزي",s:"أدب",u:"https://www.noor-book.com/كتاب-كليلة-ودمنة-pdf"},
+        {t:"رسائل الجاحظ",a:"الجاحظ",c:"literature",p:300,y:"255هـ",r:5,d:"رسائل أدبية",s:"أدب",u:"https://www.noor-book.com/كتاب-رسائل-الجاحظ-pdf"},
+        {t:"البخلاء",a:"الجاحظ",c:"literature",p:180,y:"255هـ",r:5,d:"نوادر البخلاء",s:"أدب",u:"https://www.noor-book.com/كتاب-البخلاء-pdf"},
+        {t:"تاريخ الطبري",a:"الطبري",c:"history",p:8500,y:"310هـ",r:5,d:"تاريخ الأمم والملوك",s:"تاريخ",u:"https://www.noor-book.com/كتاب-تاريخ-الطبري-pdf"},
+        {t:"سير أعلام النبلاء",a:"الذهبي",c:"history",p:5200,y:"748هـ",r:5,d:"تراجم المشاهير",s:"تراجم",u:"https://www.noor-book.com/كتاب-سير-أعلام-النبلاء-pdf"},
+        {t:"البداية والنهاية",a:"ابن كثير",c:"history",p:4000,y:"774هـ",d:"التاريخ الإسلامي",s:"تاريخ",u:"https://www.noor-book.com/كتاب-البداية-والنهاية-pdf"},
+        {t:"مقدمة ابن خلدون",a:"ابن خلدون",c:"history",p:1400,y:"808هـ",r:5,d:"مقدمة في التاريخ والعمران",s:"فلسفة",u:"https://www.noor-book.com/كتاب-مقدمة-ابن-خلدون-pdf"},
+        {t:"لسان العرب",a:"ابن منظور",c:"language",p:15000,y:"711هـ",r:5,d:"أعظم المعاجم العربية",s:"معجم",u:"https://www.noor-book.com/كتاب-لسان-العرب-pdf"},
+        {t:"كتاب سيبويه",a:"سيبويه",c:"language",p:2200,y:"180هـ",r:5,d:"أول كتاب في النحو العربي",s:"نحو",u:"https://www.noor-book.com/كتاب-سيبويه-pdf"},
+        {t:"القانون في الطب",a:"ابن سينا",c:"science",p:3200,y:"428هـ",r:5,d:"موسوعة طبية ضخمة",s:"طب",u:"https://www.noor-book.com/كتاب-القانون-في-الطب-pdf"},
+        {t:"الجبر والمقابلة",a:"الخوارزمي",c:"science",p:320,y:"232هـ",r:5,d:"أول كتاب في الجبر",s:"رياضيات",u:"https://www.noor-book.com/كتاب-الجبر-والمقابلة-pdf"},
+        {t:"تهافت الفلاسفة",a:"الغزالي",c:"philosophy",p:400,y:"494هـ",r:5,d:"نقد الفلاسفة",s:"فلسفة",u:"https://www.noor-book.com/كتاب-تهافت-الفلاسفة-pdf"},
+        {t:"تعليم المتعلم",a:"الزرنوجي",c:"education",p:180,y:"591هـ",r:5,d:"آداب طلب العلم",s:"تربية",u:"https://www.noor-book.com/كتاب-تعليم-المتعلم-pdf"},
+        {t:"كتاب الخراج",a:"أبو يوسف",c:"economy",p:380,y:"182هـ",r:5,d:"اقتصاد إسلامي",s:"اقتصاد",u:"https://www.noor-book.com/كتاب-الخراج-pdf"},
+        {t:"قصة النبي يوسف",a:"قصص الأنبياء",c:"stories",p:24,y:"2020",r:5,d:"قصة النبي يوسف عليه السلام",s:"قصص دينية",u:"https://www.noor-book.com/قصة-النبي-يوسف-pdf"},
+        {t:"قصة أصحاب الكهف",a:"قصص قرآنية",c:"stories",p:20,y:"2021",r:5,d:"قصة الفتية المؤمنين",s:"قصص دينية",u:"https://www.noor-book.com/قصة-أصحاب-الكهف-pdf"},
+        {t:"قصة النبي نوح",a:"قصص الأنبياء",c:"stories",p:22,y:"2021",r:5,d:"سفينة نوح والطوفان",s:"قصص دينية",u:"https://www.noor-book.com/قصة-النبي-نوح-pdf"},
+        {t:"قصة النبي موسى",a:"قصص الأنبياء",c:"stories",p:25,y:"2020",r:5,d:"قصة موسى مع فرعون",s:"قصص دينية",u:"https://www.noor-book.com/قصة-النبي-موسى-pdf"},
+        {t:"قصة النبي إبراهيم",a:"قصص الأنبياء",c:"stories",p:18,y:"2020",r:5,d:"قصة التوحيد",s:"قصص دينية",u:"https://www.noor-book.com/قصة-النبي-إبراهيم-pdf"},
+        {t:"قصة النبي آدم",a:"قصص الأنبياء",c:"stories",p:15,y:"2020",r:5,d:"قصة أول البشر",s:"قصص دينية",u:"https://www.noor-book.com/قصة-النبي-آدم-pdf"},
+        {t:"قصة النبي عيسى",a:"قصص الأنبياء",c:"stories",p:20,y:"2021",r:5,d:"معجزة المسيح",s:"قصص دينية",u:"https://www.noor-book.com/قصة-النبي-عيسى-pdf"},
+        {t:"قصة النبي محمد",a:"السيرة النبوية",c:"stories",p:100,y:"2020",r:5,d:"سيرة النبي ﷺ",s:"سيرة",u:"https://www.noor-book.com/سيرة-النبي-محمد-pdf"},
+        {t:"قصة صلاح الدين",a:"قصص تاريخية",c:"stories",p:30,y:"2020",r:5,d:"تحرير بيت المقدس",s:"قصص تاريخية",u:"https://www.noor-book.com/قصة-صلاح-الدين-pdf"},
+        {t:"قصة فتح الأندلس",a:"قصص تاريخية",c:"stories",p:28,y:"2020",r:5,d:"طارق بن زياد",s:"قصص تاريخية",u:"https://www.noor-book.com/قصة-فتح-الأندلس-pdf"},
+        {t:"قصة ابن سينا",a:"قصص علماء",c:"stories",p:22,y:"2021",r:5,d:"أمير الأطباء",s:"قصص سيرة",u:"https://www.noor-book.com/قصة-ابن-سينا-pdf"},
+        {t:"قصة البيروني",a:"قصص علماء",c:"stories",p:20,y:"2021",r:5,d:"عالم الفلك",s:"قصص سيرة",u:"https://www.noor-book.com/قصة-البيروني-pdf"},
+        {t:"قصة الخوارزمي",a:"قصص علماء",c:"stories",p:18,y:"2021",r:5,d:"أبو الجبر",s:"قصص سيرة",u:"https://www.noor-book.com/قصة-الخوارزمي-pdf"},
+        {t:"قصة ابن الهيثم",a:"قصص علماء",c:"stories",p:17,y:"2021",r:5,d:"عالم الضوء",s:"قصص سيرة",u:"https://www.noor-book.com/قصة-ابن-الهيثم-pdf"},
+        {t:"قصة جابر بن حيان",a:"قصص علماء",c:"stories",p:19,y:"2021",r:5,d:"أبو الكيمياء",s:"قصص سيرة",u:"https://www.noor-book.com/قصة-جابر-بن-حيان-pdf"},
+        {t:"الأرنب والسلحفاة",a:"قصص عالمية",c:"stories",p:16,y:"2018",r:5,d:"الصبر يحقق النجاح",s:"قصص حيوانات",u:"https://www.noor-book.com/الأرنب-والسلحفاة-pdf"},
+        {t:"الأسد والفأر",a:"قصص عالمية",c:"stories",p:10,y:"2018",r:5,d:"لا تحقرن صغيرا",s:"قصص حيوانات",u:"https://www.noor-book.com/الأسد-والفأر-pdf"},
+        {t:"قصة الصدق",a:"قصص أخلاقية",c:"stories",p:15,y:"2022",r:5,d:"أهمية الصدق",s:"قصص أخلاقية",u:"https://www.noor-book.com/قصة-الصدق-pdf"},
+        {t:"قصة التعاون",a:"قصص أخلاقية",c:"stories",p:14,y:"2022",r:5,d:"قوة التعاون",s:"قصص أخلاقية",u:"https://www.noor-book.com/قصة-التعاون-pdf"},
+        {t:"قصة الأمانة",a:"قصص أخلاقية",c:"stories",p:12,y:"2022",r:5,d:"أهمية الأمانة",s:"قصص أخلاقية",u:"https://www.noor-book.com/قصة-الأمانة-pdf"},
+        {t:"قصة بر الوالدين",a:"قصص أخلاقية",c:"stories",p:18,y:"2022",r:5,d:"حقوق الوالدين",s:"قصص أخلاقية",u:"https://www.noor-book.com/قصة-بر-الوالدين-pdf"}
+        ];
+        base.forEach((b,i)=>books.push({...b,id:i+1}));
+        
+        const allCats=['islamic','literature','history','science','language','philosophy','education','economy','stories'];
+        const sub={islamic:['حديث','تفسير','فقه','سيرة','عقيدة'],literature:['أدب','شعر','نثر'],history:['تاريخ','تراجم'],science:['طب','رياضيات','فلك'],language:['نحو','معجم'],philosophy:['فلسفة'],education:['تربية','أخلاق'],economy:['اقتصاد'],stories:['قصص دينية','قصص تاريخية','قصص سيرة','قصص أخلاقية']};
+        const auth={islamic:['ابن تيمية','ابن القيم','النووي','الذهبي'],literature:['المتنبي','البحتري'],history:['المسعودي','ابن الأثير'],science:['البيروني','الرازي'],language:['الجوهري','ابن جني'],philosophy:['الفارابي','ابن رشد'],education:['الغزالي','ابن الجوزي'],economy:['الماوردي'],stories:['قصص إسلامية','قصص تاريخية']};
+        
+        for(let i=books.length;i<200;i++){let c=allCats[Math.floor(Math.random()*allCats.length)],s=sub[c][Math.floor(Math.random()*sub[c].length)];books.push({id:i+1,t:'كتاب '+s+' '+(i-base.length+1),a:auth[c][Math.floor(Math.random()*auth[c].length)],c,p:Math.floor(Math.random()*400)+100,y:Math.floor(Math.random()*600)+300+'هـ',r:4,d:'كتاب في '+s,s,u:'https://www.noor-book.com/'});}
+
+        const quotes=[
+        {t:"العلم يرفع بيوتاً لا عماد لها والجهل يهدم بيت العز والشرف",a:"حكمة عربية"},{t:"من طلب العلا سهر الليالي",a:"المتنبي"},{t:"العلم في الصغر كالنقش على الحجر",a:"حكمة"},{t:"اطلبوا العلم من المهد إلى اللحد",a:"حكمة"},{t:"القراءة غذاء العقل والروح",a:"حكمة"},{t:"الكتاب خير جليس وأنيس",a:"الجاحظ"},{t:"العلم ملك والمال عبد",a:"حكمة"},{t:"القلم أقوى من السيف",a:"مثل"},{t:"خير جليس في الزمان كتاب",a:"المتنبي"},{t:"العلم نور والجهل ظلام",a:"حكمة"},{t:"الكتاب نافذة على العالم",a:"حكمة"},{t:"لا خير في علم لا يُنتفع به",a:"حكمة"},{t:"العلم كنز لا يفنى",a:"حكمة"},{t:"القارئ يعيش ألف حياة",a:"جورج مارتن"},{t:"الكتب سفن تمخر عباب الزمن",a:"حكمة"},{t:"الجهل عدو الإنسان الأول",a:"حكمة"},{t:"العلم يورث التواضع",a:"حكمة"},{t:"الكتاب صديق وفي",a:"حكمة"},{t:"العلم أساس كل تقدم",a:"حكمة"},{t:"الكتاب رفيق الدرب",a:"حكمة"},{t:"العلم يرفع صاحبه",a:"حكمة"},{t:"القراءة مفتاح المعرفة",a:"حكمة"},{t:"الكتاب نهر من الحكمة",a:"حكمة"},{t:"القراءة متعة العقل",a:"حكمة"},{t:"الكتاب يفتح الآفاق",a:"حكمة"},{t:"العلم زاد المسافر",a:"حكمة"},{t:"القراءة تزيد المعرفة",a:"حكمة"},{t:"الكتاب يزيل الوحدة",a:"حكمة"},{t:"العلم يبني الحضارات",a:"حكمة"},{t:"الكتاب حصن من الجهل",a:"حكمة"},{t:"العلم يورث السعادة",a:"حكمة"},{t:"القراءة تثري اللغة",a:"حكمة"},{t:"الكتاب يمسح الهموم",a:"حكمة"},{t:"العلم نور الدنيا",a:"حكمة"},{t:"القراءة باب للإبداع",a:"حكمة"},{t:"الكتاب يعلم الصبر",a:"حكمة"},{t:"العلم يرفع الهمم",a:"حكمة"},{t:"القراءة تشرح الصدور",a:"حكمة"},{t:"الكتاب جسر للثقافات",a:"حكمة"},{t:"العلم يصقل العقول",a:"حكمة"},{t:"القراءة رحلة بلا تذاكر",a:"حكمة"},{t:"العلماء ورثة الأنبياء",a:"حديث"},{t:"اطلبوا العلم ولو في الصين",a:"حديث"},{t:"إنما العلم بالتعلم",a:"حديث"},{t:"خير الناس أنفعهم للناس",a:"حديث"},{t:"طلب العلم فريضة",a:"حديث"},{t:"إن الله يحب العمل المتقن",a:"حديث"},{t:"خيركم من تعلم القرآن وعلمه",a:"حديث"},{t:"الدين النصيحة",a:"حديث"},{t:"إنما الأعمال بالنيات",a:"حديث"},{t:"لا يؤمن أحدكم حتى يحب لأخيه ما يحب لنفسه",a:"حديث"},{t:"تبسمك في وجه أخيك صدقة",a:"حديث"},{t:"الكلمة الطيبة صدقة",a:"حديث"},{t:"المؤمن لا يلدغ من جحر مرتين",a:"حديث"},{t:"من كتم علماً ألجم بلجام من نار",a:"حديث"},{t:"الحكمة ضالة المؤمن",a:"حديث"},{t:"المرء على دين خليله",a:"حديث"},{t:"من لا يرحم لا يُرحم",a:"حديث"},{t:"اليد العليا خير من اليد السفلى",a:"حديث"},{t:"من سلك طريقاً يلتمس فيه علماً سهل الله له طريقاً إلى الجنة",a:"حديث"},{t:"العلم في الشباب كالنقش في الحجر",a:"حكمة"},{t:"الكتاب صديق لا يخون",a:"حكمة"},{t:"العلم يورث حب الله",a:"حكمة"},{t:"القراءة متعة لا تنتهي",a:"حكمة"},{t:"الكتاب نعمة من الله",a:"حكمة"},{t:"العلم يزين صاحبه",a:"حكمة"},{t:"القراءة تهذب النفوس",a:"حكمة"},{t:"الكتاب يصقل المواهب",a:"حكمة"},{t:"العلم يبعد عن الجهل",a:"حكمة"},{t:"القراءة تعلم الحكم",a:"حكمة"},{t:"الكتاب يفتح الذهن",a:"حكمة"},{t:"العلم يورث الخشية",a:"حكمة"},{t:"القراءة تصفي الأذهان",a:"حكمة"},{t:"الكتاب يطرد الملل",a:"حكمة"},{t:"العلم أفضل من المال",a:"حكمة"},{t:"القراءة تزيد الفهم",a:"حكمة"},{t:"الكتاب يربي العقول",a:"حكمة"},{t:"العلم يرفع القدر",a:"حكمة"},{t:"القراءة تبعد الجهل",a:"حكمة"},{t:"الكتاب ينمي الفكر",a:"حكمة"},{t:"العلم يورث الأجر",a:"حكمة"},{t:"القراءة تشرح البال",a:"حكمة"},{t:"الكتاب يؤنس الوحشة",a:"حكمة"},{t:"العلم يورث المحبة",a:"حكمة"},{t:"القراءة تذهب الهم",a:"حكمة"},{t:"الكتاب يغذي الروح",a:"حكمة"},{t:"العلم يورث الراحة",a:"حكمة"},{t:"القراءة تجدد العقل",a:"حكمة"},{t:"الكتاب يحفظ الوقت",a:"حكمة"},{t:"العلم يورث البركة",a:"حكمة"},{t:"القراءة تكسب المعارف",a:"حكمة"},{t:"الكتاب يوسع المدارك",a:"حكمة"},{t:"العلم يورث النور",a:"حكمة"},{t:"القراءة تغذي الفكر",a:"حكمة"},{t:"الكتاب يبني الحياة",a:"حكمة"},{t:"العلم يورث الجمال",a:"حكمة"},{t:"القراءة تضيء الطريق",a:"حكمة"},{t:"الكتاب يقرأ ولا يُمل",a:"حكمة"},{t:"من أحب أن ينظر إلى رجل أعطاه الله علماً بلا تعب فليقرأ القرآن",a:"علي بن أبي طالب"},{t:"لا حسد إلا في اثنتين",a:"حديث"},{t:"من خرج في طلب العلم فهو في سبيل الله",a:"حديث"},{t:"الكلمة الطيبة صدقة",a:"حديث"},{t:"الكتاب يعطي بلا حدود",a:"حكمة"},{t:"العلم يهدي للحق",a:"حكمة"},{t:"القراءة تفتح الأبواب",a:"حكمة"},{t:"الكتاب نافذة على العالم",a:"حكمة"},{t:"العلم يورث السعادة",a:"حكمة"}
+        ];
+
+        const benefits=["تنشيط الدماغ","تحسين الذاكرة","زيادة المفردات","تعزيز الكتابة","تحسين التركيز","تقليل التوتر","تحسين النوم","زيادة المعرفة","تعزيز التفكير","تحسين التواصل","زيادة الثقة","تعزيز الإبداع","تحسين الفهم","تقليل الملل","زيادة السعادة","تحسين المزاج","تعلم لغات","تحسين الفهم","زيادة الثقافة","تحسين التحصيل","تعزيز العلاقات","زيادة الوعي","تحسين الذاكرة","تعزيز المنطق","تحليل النصوص","زيادة الإنتاجية","تحسين الحياة","زيادة الفهم","تعزيز النقد","زيادة الوعي","تحسين التركيز","تعزيز الإبداع","زيادة الانتباه","تحسين الاستيعاب","تعزيز المجرد","زيادة الثقافة","تحسين اللفظية","تعزيز الاستنتاج","زيادة الاجتماعي","تحسين المطول","تعزيز المنهجي","زيادة التاريخي","تحليل المواقف","تعزيز المكاني","زيادة العلمي","تحسين الاستنتاج","تعزيز الرياضي","زيادة البيئي","تحسين الرقمية","تنمية الذكاء"];
+
+        const rules=[
+        {t:"الاستخدام الشخصي",d:"للاستخدام الشخصي فقط",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><circle cx='12' cy='12' r='10'/></svg>"},
+        {t:"احترام النشر",d:"لا إعادة نشر",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><path d='M12 2L2 7l10 5 10-5z'/></svg>"},
+        {t:"عدم البيع",d:"الكتب مجانية",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><line x1='12' y1='1' x2='12' y2='23'/></svg>"},
+        {t:"البحث السريع",d:"استخدم البحث",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><circle cx='11' cy='11' r='8'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>"},
+        {t:"المشاركة",d:"شارك مع الآخرين",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><circle cx='18' cy='5' r='3'/><circle cx='6' cy='12' r='3'/><circle cx='18' cy='19' r='3'/></svg>"},
+        {t:"التقييمات",d:"شاركنا رأيك لتطوير المومقع",i:"<svg width='16' viewBox='0 0 24 24' fill='none' stroke='#1a1512'><path d='M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z'/></svg>"}
+        ];
+
+        let curP='home',curBp=1,curF='all',sq='',curB=null,bpp=18;
+        const si=document.getElementById('search'),bg=document.getElementById('bg'),pg=document.getElementById('pg'),bc=document.getElementById('bc'),mo=document.getElementById('mo'),mb=document.getElementById('mb'),me=document.getElementById('me'),ts=document.getElementById('ts');
+        
+        // نظام التقييمات - يستخدم localStorage (التقييمات تتحفظ لكل مستخدم على نفس المتصفح)
+        let reviews = JSON.parse(localStorage.getItem('bookReviews')) || [];
+        let currentRating = 5;
+        
+        function renderReviews() {
+            const container = document.getElementById('reviewsList');
+            if(!container) return;
+            if(reviews.length === 0) {
+                container.innerHTML = '<div class="empty-reviews">لا توجد تقييمات بعد، كن أول من يقيم المكتبة!</div>';
+                return;
+            }
+            container.innerHTML = reviews.map(r => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <span class="reviewer-name">${escapeHtml(r.name)}</span>
+                        <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                        <span class="review-date">${r.date}</span>
+                    </div>
+                    <div class="review-text">${escapeHtml(r.text)}</div>
+                </div>
+            `).join('');
+        }
+        
+        function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; }); }
+        
+        function addReview(name, text, rating) {
+            if(!name.trim()) { toast('الرجاء كتابة اسمك'); return false; }
+            if(!text.trim()) { toast('الرجاء كتابة تعليقك'); return false; }
+            
+            const newReview = {
+                id: Date.now(),
+                name: name.trim(),
+                text: text.trim(),
+                rating: rating,
+                date: new Date().toLocaleDateString('ar-EG')
+            };
+            reviews.unshift(newReview);
+            localStorage.setItem('bookReviews', JSON.stringify(reviews));
+            renderReviews();
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            anim('st1', books.length);
+            renderCats(); renderQ(); renderB(); renderR(); renderReviews();
+            
+            si.oninput = e => { sq = e.target.value.toLowerCase(); if(curP === 'books') { curBp = 1; renderBooks(); } };
+            
+            document.querySelectorAll('.filter-pill').forEach(p => p.onclick = function() { curF = this.dataset.f; curBp = 1; document.querySelectorAll('.filter-pill').forEach(x => x.classList.remove('active')); this.classList.add('active'); renderBooks(); });
+            
+            mo.onclick = e => { if(e.target === mo) cm(); };
+            document.onkeydown = e => { if(e.key === 'Escape') cm(); };
+            
+            const starSpans = document.querySelectorAll('#starRating span');
+            starSpans.forEach(span => {
+                span.onclick = function() {
+                    currentRating = parseInt(this.dataset.val);
+                    starSpans.forEach((s, i) => { if(i < currentRating) s.textContent = '★'; else s.textContent = '☆'; });
+                };
+            });
+            starSpans.forEach((s, i) => { if(i < 5) s.textContent = '★'; });
+            
+            document.getElementById('submitReview')?.addEventListener('click', () => {
+                const name = document.getElementById('reviewName').value;
+                const text = document.getElementById('reviewText').value;
+                if(addReview(name, text, currentRating)) {
+                    document.getElementById('reviewName').value = '';
+                    document.getElementById('reviewText').value = '';
+                    starSpans.forEach((s, i) => { if(i < 5) s.textContent = '★'; });
+                    currentRating = 5;
+                    toast('شكراً على تقييمك! ');
+                }
+            });
+        });
+
+        function nav(p) { curP = p; document.querySelectorAll('.page').forEach(x => x.classList.remove('active')); document.getElementById('p-'+p).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => { l.classList.remove('active'); if(l.dataset.p === p) l.classList.add('active'); }); if(p === 'books') renderBooks(); if(p === 'reviews') renderReviews(); scrollTo(0,0); }
+        function goCat(c) { curF = c; curBp = 1; nav('books'); setTimeout(() => { document.querySelectorAll('.filter-pill').forEach(p => { p.classList.remove('active'); if(p.dataset.f === c) p.classList.add('active'); }); renderBooks(); }, 50); }
+        function anim(id, n) { const el = document.getElementById(id); let c = 0, inc = n/20; const t = setInterval(() => { c += inc; if(c >= n) { el.textContent = n.toLocaleString('ar'); clearInterval(t); } else el.textContent = Math.floor(c).toLocaleString('ar'); }, 30); }
+        function renderCats() { const c = [{id:'islamic',n:'إسلامية'},{id:'literature',n:'أدب'},{id:'history',n:'تاريخ'},{id:'science',n:'علوم'},{id:'language',n:'لغة'},{id:'philosophy',n:'فلسفة'},{id:'education',n:'تربية'},{id:'economy',n:'اقتصاد'},{id:'stories',n:'القصص'}]; document.getElementById('cats').innerHTML = c.map(c => `<a href="#" class="category-card" onclick="goCat('${c.id}');return false"><div class="category-img" style="background:linear-gradient(135deg,${cols[c.id]},#1a1512)">${icons[c.id]}</div><div class="category-name">${c.n}</div><div class="category-count">${books.filter(b=>b.c===c.id).length}</div></a>`).join(''); }
+        function renderQ() { document.getElementById('qg').innerHTML = quotes.map(q => `<div class="quote-card"><span class="quote-mark">"</span><p class="quote-text">${q.t}</p><p class="quote-author">— ${q.a}</p></div>`).join(''); }
+        function renderB() { document.getElementById('bng').innerHTML = benefits.map(b => `<div class="benefit-item"><h3>${b}</h3><p>من الفوائد</p></div>`).join(''); }
+        function renderR() { document.getElementById('rg').innerHTML = rules.map(r => `<div class="rule-card"><div class="rule-icon">${r.i}</div><h3 class="rule-title">${r.t}</h3><p class="rule-desc">${r.d}</p></div>`).join(''); }
+        function renderBooks() { let f = books; if(curF !== 'all') f = f.filter(b => b.c === curF); if(sq) f = f.filter(b => b.t.includes(sq) || b.a.includes(sq)); bc.textContent = 'عرض '+f.length; const tp = Math.ceil(f.length/bpp), st = (curBp-1)*bpp, pgd = f.slice(st, st+bpp); bg.innerHTML = pgd.length ? pgd.map(b => bookCard(b)).join('') : '<div style="grid-column:1/-1;text-align:center;padding:20px">لا نتائج</div>'; renderPg(tp); }
+        function bookCard(b) { const rs = '★'.repeat(b.r); const cn = {islamic:'إسلامي',literature:'أدب',history:'تاريخ',science:'علوم',language:'لغة',philosophy:'فلسفة',education:'تربية',economy:'اقتصاد',stories:'قصص'}; return `<article class="book-card" onclick="openBook(${b.id})"><div class="book-cover" style="background:linear-gradient(135deg,${cols[b.c]},#1a1512)"><div class="book-cover-overlay"></div><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center"><svg width="25" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.2)"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg><h3 style="color:#fff;font-size:0.65rem;margin-top:8px;font-family:Amiri">${b.t}</h3></div><span class="book-badge">${cn[b.c]}</span><span class="book-source">noor</span></div><div class="book-info"><h3 class="book-title">${b.t}</h3><p class="book-author">${b.a}</p><div class="book-meta"><span>${b.p} ص</span><span class="book-rating">${rs}</span></div></div></article>`; }
+        function renderPg(t) { if(t <= 1) { pg.innerHTML = ''; return; } let h = ''; if(curBp > 1) h += `<button class="page-btn" onclick="go(${curBp-1})">السابق</button>`; for(let i=1; i<=t; i++) if(i===1 || i===t || Math.abs(i-curBp)<=1) h += `<button class="page-btn${i===curBp?' active':''}" onclick="go(${i})">${i}</button>`; if(curBp < t) h += `<button class="page-btn" onclick="go(${curBp+1})">التالي</button>`; pg.innerHTML = h; }
+        function go(p) { curBp = p; renderBooks(); scrollTo(0,180); }
+        function openBook(id) { curB = books.find(b => b.id === id); if(!curB) return; const rs = '★'.repeat(curB.r); const cn = {islamic:'إسلامي',literature:'أدب',history:'تاريخ',science:'علوم',language:'لغة',philosophy:'فلسفة',education:'تربية',economy:'اقتصاد',stories:'قصص'}; mb.innerHTML = `<div class="modal-book-header"><div class="modal-book-cover" style="background:linear-gradient(135deg,${cols[curB.c]},#1a1512);display:flex;align-items:center;justify-content:center"><div style="text-align:center;padding:12px"><h3 style="color:#fff;font-size:0.85rem;font-family:Amiri">${curB.t}</h3></div></div><div class="modal-book-info"><h2>${curB.t}</h2><p class="modal-book-author">${curB.a}</p><div class="modal-book-meta"><div class="meta-badge">${curB.p} ص</div><div class="meta-badge">${curB.y}</div><div class="meta-badge" style="color:var(--accent-gold)">${rs}</div></div><p class="modal-book-desc">${curB.d}</p><div class="modal-actions"><a href="${curB.u}" target="_blank" class="btn btn-primary"><svg width="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>قراءة</a><button class="btn btn-secondary" onclick="cm()">إغلاق</button></div><div class="download-note">من مكتبة النور</div></div></div>`; me.innerHTML = `<div class="extra-info-item"><h4>المؤلف</h4><p>${curB.a}</p></div><div class="extra-info-item"><h4>الموضوع</h4><p>${curB.s}</p></div><div class="extra-info-item"><h4>الصفحات</h4><p>${curB.p}</p></div><div class="extra-info-item"><h4>السنة</h4><p>${curB.y}</p></div><div class="extra-info-item"><h4>التصنيف</h4><p>${cn[curB.c]}</p></div><div class="extra-info-item"><h4>المصدر</h4><p>مكتبة النور</p></div>`; mo.classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function cm() { mo.classList.remove('active'); document.body.style.overflow = ''; }
+        function toast(m) { ts.textContent = m; ts.classList.add('show'); setTimeout(() => ts.classList.remove('show'), 2000); }
+
+        function renderFilters() { const f = ['all','islamic','literature','history','science','language','philosophy','education','economy','stories']; const fn = {all:'الكل',islamic:'إسلامية',literature:'أدب',history:'تاريخ',science:'علوم',language:'لغة',philosophy:'فلسفة',education:'تربية',economy:'اقتصاد',stories:'القصص'}; document.getElementById('pills').innerHTML = f.map(c => `<button class="filter-pill${c==='all'?' active':''}" data-f="${c}">${fn[c]}</button>`).join(''); }
+        renderFilters();
+    </script>
+</body>
+</html>
