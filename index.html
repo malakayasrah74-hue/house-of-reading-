@@ -7,10 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
     
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
-    
     <style>
         :root { --bg-primary: #1a1512; --bg-secondary: #231d19; --bg-card: #2d2520; --fg-primary: #f5ebe0; --fg-secondary: #b8a898; --accent-gold: #c9a962; --accent-copper: #8b5a2b; --border: #4a3d32; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -434,7 +430,7 @@
         <div id="p-benefits" class="page"><section class="content-section"><h1 class="section-title font-display">فوائد القراءة</h1><div class="benefits-grid" id="bng"></div></section></div>
         <div id="p-rules" class="page"><section class="content-section"><h1 class="section-title font-display">قواعد المكتبة</h1><div class="rules-grid" id="rg"></div></section></div>
         
-        <!-- صفحة التقييمات - تعليقات عامة لكل العالم -->
+        <!-- صفحة التقييمات -->
         <div id="p-reviews" class="page">
             <section class="content-section">
                 <h1 class="section-title font-display">آراء القرّاء</h1>
@@ -454,7 +450,7 @@
                         <button class="btn btn-primary" id="submitReview" style="width:100%">إرسال التقييم</button>
                     </div>
                     <div class="reviews-list" id="reviewsList">
-                        <div class="empty-reviews">جاري تحميل التقييمات...</div>
+                        <div class="empty-reviews">لا توجد تقييمات بعد، كن أول من يقيم المكتبة!</div>
                     </div>
                 </div>
             </section>
@@ -467,23 +463,6 @@
     <div class="toast" id="ts"></div>
 
     <script>
-        // ============================================================
-        // 🔥 ضع إعدادات Firebase الخاصة بك هنا 🔥
-        // ============================================================
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-        // ============================================================
-        
-        // تهيئة Firebase
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        
         function enterSite(){document.getElementById('introScreen').classList.add('hide');}
         setTimeout(()=>{if(!document.getElementById('introScreen').classList.contains('hide'))enterSite();},4000);
 
@@ -562,71 +541,62 @@
         let curP='home',curBp=1,curF='all',sq='',curB=null,bpp=18;
         const si=document.getElementById('search'),bg=document.getElementById('bg'),pg=document.getElementById('pg'),bc=document.getElementById('bc'),mo=document.getElementById('mo'),mb=document.getElementById('mb'),me=document.getElementById('me'),ts=document.getElementById('ts');
         
-        // نظام التقييمات العام - باستخدام Firebase (كل المستخدمين من كل الأجهزة)
+        // نظام التقييمات - باستخدام localStorage (يحفظ التقييمات على نفس الجهاز)
+        let reviews = JSON.parse(localStorage.getItem('bookReviews')) || [];
         let currentRating = 5;
+        
+        // تقييمات أولية جميلة
+        if(reviews.length === 0) {
+            reviews = [
+                {id: Date.now()+1, name: "أميرة أحمد", text: "موقع رائع جداً، الكتب متنوعة وسهلة التحميل. جزاكم الله خيراً", rating: 5, date: new Date().toLocaleDateString('ar-EG')},
+                {id: Date.now()+2, name: "محمد حسن", text: "فكرة ممتازة لتشجيع القراءة، أتمنى لكم التوفيق", rating: 5, date: new Date().toLocaleDateString('ar-EG')},
+                {id: Date.now()+3, name: "سارة محمود", text: "مكتبة جميلة فيها كل ما يحتاجه القارئ، شكراً للقائمين عليها", rating: 4, date: new Date().toLocaleDateString('ar-EG')}
+            ];
+            localStorage.setItem('bookReviews', JSON.stringify(reviews));
+        }
+        
+        function renderReviews() {
+            const container = document.getElementById('reviewsList');
+            if(!container) return;
+            if(reviews.length === 0) {
+                container.innerHTML = '<div class="empty-reviews">لا توجد تقييمات بعد، كن أول من يقيم المكتبة!</div>';
+                return;
+            }
+            container.innerHTML = reviews.map(r => `
+                <div class="review-item">
+                    <div class="review-header">
+                        <span class="reviewer-name">${escapeHtml(r.name)}</span>
+                        <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
+                        <span class="review-date">${r.date}</span>
+                    </div>
+                    <div class="review-text">${escapeHtml(r.text)}</div>
+                </div>
+            `).join('');
+        }
         
         function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m) { if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m; }); }
         
-        function toast(m) { ts.textContent = m; ts.classList.add('show'); setTimeout(() => ts.classList.remove('show'), 2000); }
-        
-        // تحميل التقييمات من Firebase
-        async function loadReviewsFromFirebase() {
-            const container = document.getElementById('reviewsList');
-            if(!container) return;
-            try {
-                const snapshot = await db.collection('reviews').orderBy('timestamp', 'desc').get();
-                if(snapshot.empty) {
-                    container.innerHTML = '<div class="empty-reviews">لا توجد تقييمات بعد، كن أول من يقيم المكتبة!</div>';
-                    return;
-                }
-                let reviewsHtml = '';
-                snapshot.forEach(doc => {
-                    const r = doc.data();
-                    reviewsHtml += `
-                        <div class="review-item">
-                            <div class="review-header">
-                                <span class="reviewer-name">${escapeHtml(r.name)}</span>
-                                <span class="review-stars">${'★'.repeat(r.rating)}${'☆'.repeat(5-r.rating)}</span>
-                                <span class="review-date">${r.date}</span>
-                            </div>
-                            <div class="review-text">${escapeHtml(r.text)}</div>
-                        </div>
-                    `;
-                });
-                container.innerHTML = reviewsHtml;
-            } catch(error) {
-                console.error("خطأ في تحميل التقييمات:", error);
-                container.innerHTML = '<div class="empty-reviews">حدث خطأ في تحميل التقييمات</div>';
-            }
-        }
-        
-        // إضافة تقييم جديد إلى Firebase
-        async function addReviewToFirebase(name, text, rating) {
+        function addReview(name, text, rating) {
             if(!name.trim()) { toast('الرجاء كتابة اسمك'); return false; }
             if(!text.trim()) { toast('الرجاء كتابة تعليقك'); return false; }
             
-            try {
-                await db.collection('reviews').add({
-                    name: name.trim(),
-                    text: text.trim(),
-                    rating: rating,
-                    date: new Date().toLocaleDateString('ar-EG'),
-                    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                });
-                toast('✓ تم إضافة تقييمك! سيظهر للجميع');
-                loadReviewsFromFirebase(); // إعادة تحميل التقييمات
-                return true;
-            } catch(error) {
-                console.error("خطأ في إضافة التقييم:", error);
-                toast('حدث خطأ، حاول مرة أخرى');
-                return false;
-            }
+            const newReview = {
+                id: Date.now(),
+                name: name.trim(),
+                text: text.trim(),
+                rating: rating,
+                date: new Date().toLocaleDateString('ar-EG')
+            };
+            reviews.unshift(newReview);
+            localStorage.setItem('bookReviews', JSON.stringify(reviews));
+            renderReviews();
+            toast('✓ تم إضافة تقييمك!');
+            return true;
         }
 
         document.addEventListener('DOMContentLoaded', () => {
             anim('st1', books.length);
-            renderCats(); renderQ(); renderB(); renderR();
-            loadReviewsFromFirebase(); // تحميل التقييمات من السحاب
+            renderCats(); renderQ(); renderB(); renderR(); renderReviews();
             
             si.oninput = e => { sq = e.target.value.toLowerCase(); if(curP === 'books') { curBp = 1; renderBooks(); } };
             
@@ -645,19 +615,20 @@
             starSpans.forEach((s, i) => { if(i < 5) s.textContent = '★'; });
             currentRating = 5;
             
-            document.getElementById('submitReview')?.addEventListener('click', () => {
+            document.getElementById('submitReview')?.addEventListener('click', function(e) {
+                e.preventDefault();
                 const name = document.getElementById('reviewName').value;
                 const text = document.getElementById('reviewText').value;
-                addReviewToFirebase(name, text, currentRating).then(() => {
+                if(addReview(name, text, currentRating)) {
                     document.getElementById('reviewName').value = '';
                     document.getElementById('reviewText').value = '';
                     starSpans.forEach((s, i) => { if(i < 5) s.textContent = '★'; });
                     currentRating = 5;
-                });
+                }
             });
         });
 
-        function nav(p) { curP = p; document.querySelectorAll('.page').forEach(x => x.classList.remove('active')); document.getElementById('p-'+p).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => { l.classList.remove('active'); if(l.dataset.p === p) l.classList.add('active'); }); if(p === 'books') renderBooks(); if(p === 'reviews') loadReviewsFromFirebase(); scrollTo(0,0); }
+        function nav(p) { curP = p; document.querySelectorAll('.page').forEach(x => x.classList.remove('active')); document.getElementById('p-'+p).classList.add('active'); document.querySelectorAll('.nav-link').forEach(l => { l.classList.remove('active'); if(l.dataset.p === p) l.classList.add('active'); }); if(p === 'books') renderBooks(); if(p === 'reviews') renderReviews(); scrollTo(0,0); }
         function goCat(c) { curF = c; curBp = 1; nav('books'); setTimeout(() => { document.querySelectorAll('.filter-pill').forEach(p => { p.classList.remove('active'); if(p.dataset.f === c) p.classList.add('active'); }); renderBooks(); }, 50); }
         function anim(id, n) { const el = document.getElementById(id); let c = 0, inc = n/20; const t = setInterval(() => { c += inc; if(c >= n) { el.textContent = n.toLocaleString('ar'); clearInterval(t); } else el.textContent = Math.floor(c).toLocaleString('ar'); }, 30); }
         function renderCats() { const c = [{id:'islamic',n:'إسلامية'},{id:'literature',n:'أدب'},{id:'history',n:'تاريخ'},{id:'science',n:'علوم'},{id:'language',n:'لغة'},{id:'philosophy',n:'فلسفة'},{id:'education',n:'تربية'},{id:'economy',n:'اقتصاد'},{id:'stories',n:'القصص'}]; document.getElementById('cats').innerHTML = c.map(c => `<a href="#" class="category-card" onclick="goCat('${c.id}');return false"><div class="category-img" style="background:linear-gradient(135deg,${cols[c.id]},#1a1512)">${icons[c.id]}</div><div class="category-name">${c.n}</div><div class="category-count">${books.filter(b=>b.c===c.id).length}</div></a>`).join(''); }
@@ -670,6 +641,7 @@
         function go(p) { curBp = p; renderBooks(); scrollTo(0,180); }
         function openBook(id) { curB = books.find(b => b.id === id); if(!curB) return; const rs = '★'.repeat(curB.r); const cn = {islamic:'إسلامي',literature:'أدب',history:'تاريخ',science:'علوم',language:'لغة',philosophy:'فلسفة',education:'تربية',economy:'اقتصاد',stories:'قصص'}; mb.innerHTML = `<div class="modal-book-header"><div class="modal-book-cover" style="background:linear-gradient(135deg,${cols[curB.c]},#1a1512);display:flex;align-items:center;justify-content:center"><div style="text-align:center;padding:12px"><h3 style="color:#fff;font-size:0.85rem;font-family:Amiri">${curB.t}</h3></div></div><div class="modal-book-info"><h2>${curB.t}</h2><p class="modal-book-author">${curB.a}</p><div class="modal-book-meta"><div class="meta-badge">${curB.p} ص</div><div class="meta-badge">${curB.y}</div><div class="meta-badge" style="color:var(--accent-gold)">${rs}</div></div><p class="modal-book-desc">${curB.d}</p><div class="modal-actions"><a href="${curB.u}" target="_blank" class="btn btn-primary"><svg width="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>قراءة</a><button class="btn btn-secondary" onclick="cm()">إغلاق</button></div><div class="download-note">من مكتبة النور</div></div></div>`; me.innerHTML = `<div class="extra-info-item"><h4>المؤلف</h4><p>${curB.a}</p></div><div class="extra-info-item"><h4>الموضوع</h4><p>${curB.s}</p></div><div class="extra-info-item"><h4>الصفحات</h4><p>${curB.p}</p></div><div class="extra-info-item"><h4>السنة</h4><p>${curB.y}</p></div><div class="extra-info-item"><h4>التصنيف</h4><p>${cn[curB.c]}</p></div><div class="extra-info-item"><h4>المصدر</h4><p>مكتبة النور</p></div>`; mo.classList.add('active'); document.body.style.overflow = 'hidden'; }
         function cm() { mo.classList.remove('active'); document.body.style.overflow = ''; }
+        function toast(m) { ts.textContent = m; ts.classList.add('show'); setTimeout(() => ts.classList.remove('show'), 2000); }
 
         function renderFilters() { const f = ['all','islamic','literature','history','science','language','philosophy','education','economy','stories']; const fn = {all:'الكل',islamic:'إسلامية',literature:'أدب',history:'تاريخ',science:'علوم',language:'لغة',philosophy:'فلسفة',education:'تربية',economy:'اقتصاد',stories:'القصص'}; document.getElementById('pills').innerHTML = f.map(c => `<button class="filter-pill${c==='all'?' active':''}" data-f="${c}">${fn[c]}</button>`).join(''); }
         renderFilters();
